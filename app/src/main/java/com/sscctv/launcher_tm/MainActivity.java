@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
     private McuControl mMcuControl;
     private boolean catchValue = false;
     private final String closeBroadcast = "net.biyee.onviferenterprise.OnviferActivity";
+
+
     private BroadcastReceiver closeReceiver = null;
 
     final String CONNECTIVITY_CHANGE = "android.net.conn.CONNECTIVITY_CHANGE";
@@ -331,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         mLastClickTime = SystemClock.elapsedRealtime();
-        startService();
+//        startService();
         mIntent = getPackageManager().getLaunchIntentForPackage("net.biyee.onviferenterprise");
         startActivity(mIntent);
     }
@@ -341,7 +343,6 @@ public class MainActivity extends AppCompatActivity {
         if(SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
             return;
         }
-        mMcuControl.controlStop();
         mIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
         mIntent.putExtra(EXTRA_SOURCE, SOURCE_SDI);
         startActivity(mIntent);
@@ -353,8 +354,6 @@ public class MainActivity extends AppCompatActivity {
         if(SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
             return;
         }
-        mMcuControl.controlStop();
-
         mIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
         mIntent.putExtra(EXTRA_SOURCE, SOURCE_AUTO);
         startActivity(mIntent);
@@ -579,10 +578,9 @@ public class MainActivity extends AppCompatActivity {
 
         mTimer.cancel();
         stopStatusService();
-
-        unregisterReceiver(mBRSdcard);
-        unregisterReceiver(closeReceiver);
-//        unregisterReceiver(receiver);
+        stopBroadCastClose();
+        stopBroadCastReceive();
+        stopBroadCastSdcard();
         super.onDestroy();
     }
 
@@ -590,10 +588,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         Log.w(TAG, "onPause");
         mTimer.cancel();
-        unregisterReceiver(receiver);
         super.onPause();
 
 
+    }
+
+    public void stopBroadCastSdcard() {
+        if(mBRSdcard != null) {
+            unregisterReceiver(mBRSdcard);
+        }
+    }
+
+
+    public void stopBroadCastClose() {
+        if(closeReceiver != null) {
+            unregisterReceiver(closeReceiver);
+        }
+    }
+
+    public void stopBroadCastReceive() {
+        if(receiver != null) {
+            unregisterReceiver(receiver);
+
+        }
     }
 
     @Override
@@ -618,7 +635,6 @@ public class MainActivity extends AppCompatActivity {
         receiver = new IsNetworkReceiver(this);
         registerReceiver(receiver, wifi_filter);
         startWatchingOEClose();
-
         startStatusService();
         try {
             sdCard_check();
@@ -861,6 +877,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Log.d(TAG, "KeyCode: " +keyCode + " KeyEvent: " + event);
+
+        return super.onKeyDown(keyCode, event);
+    }
+
+
 
     public void startWatchingOEClose() {
 //        Log.d(TAG, "startWatchingOEClose()");
@@ -868,18 +892,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String state = intent.getStringExtra("state");
-//                Log.v(TAG, "Close Screen Broadcast : " + state);
+                Log.v(TAG, "Close Screen Broadcast : " + state);
 
-                if (state.equals("close")) {
-                    stopService();
+                switch (state) {
+                    case "close":
+                        stopService();
 //                    Log.d(TAG, "Close OE");
-                } else if (state.equals("PoE ON")) {
-                    poeStart();
+                        break;
+                    case "PoE ON":
+                        poeStart();
 //                    Log.d(TAG, "PoE Start");
-                } else if (state.equals("PoE OFF")) {
-                    poeStop();
+                        break;
+                    case "PoE OFF":
+                        poeStop();
 //                    Log.d(TAG, "PoE Stop");
-
+                        break;
+                    default:
+                        startService();
+                        break;
                 }
             }
         };
@@ -887,6 +917,8 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction(closeBroadcast);
         registerReceiver(closeReceiver, filter);
     }
+
+
 
     private void startService() {
         if (!catchValue) {

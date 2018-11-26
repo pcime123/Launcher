@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sscctv.seeeyes.VideoSource;
 import com.sscctv.seeeyes.ptz.LevelMeterListener;
@@ -52,7 +53,8 @@ public class PoEIntentService extends IntentService {
     private NotificationManager nm;
     private BroadcastReceiver closeReceiver = null;
     private final String closeBroadcast = "net.biyee.onviferenterprise.OnviferActivity";
-
+    private final String viewerBroadcast = "com.sscctv.seeeyesmonitor";
+    private BroadcastReceiver viewerReceiver = null;
     private TextView mPoeLevel, mFocusLevel, mFocusPoeLevel;
 
     private View mPoeView, mFocusPoeView;
@@ -115,7 +117,6 @@ public class PoEIntentService extends IntentService {
         mFocusPoeView.setVisibility(View.INVISIBLE);
 
         startWatchingOEBroadcast();
-        startTest();
 
     }
 
@@ -140,6 +141,8 @@ public class PoEIntentService extends IntentService {
 //        sendNotification();
         //if (mMcuControl == null) {
         startWatchingOEClose();
+        startWatchingViewerClose();
+        startTest();
 
         sourceId = VideoSource.IPC;
         mMcuControl = new McuControl();
@@ -170,15 +173,18 @@ public class PoEIntentService extends IntentService {
     @Override
     public void onDestroy() {
         isRunning = false;
-        stopWatchingOEBroadcast();
+
         stopTest();
+        stopWatchingOEBroadcast();
+        stopWatchingOEClose();
+        stopWatchingViewerClose();
         stopPoeCheck();
         mMcuControl.stop();
         mMcuControl.removeReceiveBufferListener(mLevelMeterListener);
         mMcuControl = null;
-        unregisterReceiver(closeReceiver);
 
-        // Toast.makeText(this, "PoE Service Destroy", Toast.LENGTH_SHORT).show();
+
+        Toast.makeText(this, "PoE Service Destroy", Toast.LENGTH_SHORT).show();
         if (mPoeView != null) {
             mManager.removeView(mPoeView);
         }
@@ -229,65 +235,94 @@ public class PoEIntentService extends IntentService {
         registerReceiver(mOEBroadcastReceiver, filter);
     }
 
-    public void startTest() {
-        Log.v(TAG, "Start Input BroadCast");
-        mAppBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String state = intent.getStringExtra("location");
-                Log.v(TAG, "Input BroadCast : " + state);
-                switch (state) {
-                    case "center":
-                        mParams.gravity = Gravity.TOP | Gravity.CENTER;
-                        break;
-                    case "right":
-                        mParams.gravity = Gravity.TOP | Gravity.RIGHT;
-                        break;
-                    case "left":
-                        mParams.gravity = Gravity.TOP | Gravity.LEFT;
-                        break;
-                    case "bottom":
-                        mParams.gravity = Gravity.TOP | Gravity.BOTTOM;
-                        break;
-                    case "close":
-                        mPoeView.setVisibility(View.INVISIBLE);
-                        break;
-                    case "open":
-                        mPoeView.setVisibility(View.VISIBLE);
-                        break;
+    public void stopWatchingOEBroadcast() {
+        if (mOEBroadcastReceiver != null) {
+            this.unregisterReceiver(mOEBroadcastReceiver);
+        }
+    }
 
+    public void startWatchingViewerClose() {
+//        Log.d(TAG, "startWatchingOEClose()");
+        if (viewerReceiver == null) {
+            viewerReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String state = intent.getStringExtra("state");
+                    Log.v(TAG, "Close Screen Broadcast : " + state);
+
+                    if (state.equals("resume")) {
+                        mMcuControl.stop();
+                        Log.w(TAG, "PoE Volt Check OFF");
+                    } else if (state.equals("pause")) {
+                        mMcuControl.start(sourceId);
+                        Log.w(TAG, "PoE Volt Check ON");
+                    } else if (state.equals("nosignal") || state.equals("signal")) {
+                        mPoeLevel.setText("PoE 48V OUT");
+                    }
                 }
+            };
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(viewerBroadcast);
+            registerReceiver(viewerReceiver, filter);
+        }
+    }
+
+    public void stopWatchingViewerClose() {
+        if (viewerReceiver != null) {
+            unregisterReceiver(viewerReceiver);
+        }
+    }
+
+    public void startTest() {
+        if (mAppBroadcastReceiver == null) {
+            mAppBroadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String state = intent.getStringExtra("location");
+                    Log.v(TAG, "Input BroadCast : " + state);
+                    switch (state) {
+                        case "center":
+                            mParams.gravity = Gravity.TOP | Gravity.CENTER;
+                            break;
+                        case "right":
+                            mParams.gravity = Gravity.TOP | Gravity.RIGHT;
+                            break;
+                        case "left":
+                            mParams.gravity = Gravity.TOP | Gravity.LEFT;
+                            break;
+                        case "bottom":
+                            mParams.gravity = Gravity.TOP | Gravity.BOTTOM;
+                            break;
+                        case "close":
+                            mPoeView.setVisibility(View.INVISIBLE);
+                            break;
+                        case "open":
+                            mPoeView.setVisibility(View.VISIBLE);
+                            break;
+
+                    }
 //                if(mManager == null){
-                mManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-                assert mManager != null;
-                mManager.updateViewLayout(mPoeView, mParams);
+                    mManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+                    assert mManager != null;
+                    mManager.updateViewLayout(mPoeView, mParams);
 //                }
 
 //                mPoeView.setVisibility(View.INVISIBLE);
-            }
-        };
-        IntentFilter filter = new IntentFilter();
-        String appBroadcast = "com.sscctv.poeView";
-        filter.addAction(appBroadcast);
-        registerReceiver(mAppBroadcastReceiver, filter);
-
+                }
+            };
+            IntentFilter filter = new IntentFilter();
+            String appBroadcast = "com.sscctv.poeView";
+            filter.addAction(appBroadcast);
+            registerReceiver(mAppBroadcastReceiver, filter);
+        }
     }
 
     public void stopTest() {
-        unregisterReceiver(mAppBroadcastReceiver);
-        mAppBroadcastReceiver = null;
-    }
-
-    public void stopWatchingOEBroadcast() {
-        unregisterReceiver(mOEBroadcastReceiver);
-        mOEBroadcastReceiver = null;
-        try {
-            mMcuControl.stopLevelMeter();
-            mMcuControl.startPoeCheck();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+        if (mAppBroadcastReceiver != null) {
+            unregisterReceiver(mAppBroadcastReceiver);
         }
     }
+
 
     boolean levelUpdate = false;
 
@@ -305,11 +340,6 @@ public class PoEIntentService extends IntentService {
                         levelUpdate = true;
                         break;
                 }
-
-
-//                Log.d(TAG, "ScreenState : " + screenState);
-//                Log.d(TAG, "UpdateFlag : " + updateFlag);
-                //utility.logd(sLogTag, ("Pse State = " + mSource.getPseState() + " Vp State = " + mSource.getVpState()));
                 if (levelUpdate) {
 
                     levelUpdate = false;
@@ -333,18 +363,15 @@ public class PoEIntentService extends IntentService {
     }
 
 
-
     public void pseCheckState() {
         if (getPseState().equals("0")) {
             pseLevel = false;
             updateFlag = true;
             pseDisable();
-//            Log.d(TAG, "PSE OFF");
         } else if (getPseState().equals("1")) {
             pseLevel = true;
             updateFlag = true;
             pseEnable();
-//            Log.d(TAG, "PSE ON");
 
         }
     }
@@ -363,6 +390,152 @@ public class PoEIntentService extends IntentService {
         }
     }
 
+
+    @SuppressLint("HandlerLeak")
+    final Handler poe_handler = new Handler() {
+        public void handleMessage(Message msg) {
+//            Log.d(TAG, getPseState() + " <---------");
+
+//            Log.d(TAG,  "Not Full Screen updateFlag = " + updateFlag);
+            if (updateFlag) {
+                updateFlag = false;
+                if (pseLevel) {
+                    mPoeLevel.setText("PoE 48V OUT");
+                } else {
+                    mPoeLevel.setText("PoE OFF");
+                }
+            }
+            if (voltInput) {
+                mPoeLevel.setText(format("PoE : %02d.%02d V", mValue, sValue));
+            }
+        }
+    };
+
+    @SuppressLint("HandlerLeak")
+    final Handler poe_focus_handler = new Handler() {
+        public void handleMessage(Message msg) {
+//            Log.d(TAG, "Full Screen updateFlag = " + updateFlag);
+            if (updateFlag) {
+                updateFlag = false;
+                if (pseLevel) {
+                    mFocusPoeLevel.setText("PoE : 48V OUT");
+                } else {
+                    mFocusPoeLevel.setText("PoE : OFF");
+                }
+            }
+            if (voltInput) {
+                mFocusPoeLevel.setText(format("PoE : %02d.%02d V", mValue, sValue));
+            }
+        }
+    };
+
+
+    public void mPoeViewTouchHandler() {
+        mViewTouchListener = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        isMove = false;
+                        mTouchX = event.getRawX();
+                        mTouchY = event.getRawY();
+                        mViewX = mParams.x;
+                        mViewY = mParams.y;
+                        mViewX = sParams.x;
+                        mViewY = sParams.y;
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        isMove = true;
+                        int x = (int) (event.getRawX() - mTouchX);
+                        int y = (int) (event.getRawY() - mTouchY);
+                        final int num = 5;
+                        if ((x > -num && x < num) && (y > -num && y < num)) {
+                            isMove = false;
+                            break;
+                        }
+                        mParams.x = mViewX + x;
+                        mParams.y = mViewY + y;
+                        sParams.x = mViewX + x;
+                        sParams.y = mViewY + y;
+                        mManager.updateViewLayout(mPoeView, mParams);
+                        //sManager.updateViewLayout(mFocusPoeView,sParams);
+                        break;
+                }
+                return true;
+            }
+        };
+
+        mPoeView.setOnTouchListener(mViewTouchListener);
+    }
+
+
+    public void startWatchingOEClose() {
+//        Log.d(TAG, "startWatchingOEClose()");
+        if (closeReceiver == null) {
+            closeReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String state = intent.getStringExtra("state");
+//                Log.v(TAG, "Close Screen Broadcast : " + state);
+
+
+                    switch (state) {
+                        case "PoE ON":
+//                    poeStart();
+                            sendNotification();
+                            break;
+                        case "PoE OFF":
+//                    poeStop();
+                            exitNotification();
+                            break;
+                        case "close":
+                            exitNotification();
+                            break;
+                    }
+                }
+            };
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(closeBroadcast);
+            registerReceiver(closeReceiver, filter);
+        }
+    }
+
+    public void stopWatchingOEClose() {
+        if (closeReceiver != null) {
+            this.unregisterReceiver(closeReceiver);
+        }
+    }
+
+
+    public void sendNotification() {
+        Resources res = getResources();
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setContentTitle("PoE")
+                .setContentText("Running PoE service")
+                .setTicker("PoE")
+                .setSmallIcon(R.drawable.poe_noti)
+                .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.poe_large))
+                .setAutoCancel(true)
+                .setWhen(System.currentTimeMillis());
+//                    .setDefaults(Notification.DEFAULT_ALL);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            builder.setCategory(Notification.CATEGORY_MESSAGE)
+                    .setPriority(Notification.PRIORITY_HIGH)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC);
+        }
+
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.notify(11000, builder.build());
+
+    }
+
+    public void exitNotification() {
+        if (nm != null) nm.cancel(11000);
+    }
 
     private void startPoeCheck() {
         try {
@@ -468,161 +641,4 @@ public class PoEIntentService extends IntentService {
 
         return sValue;
     }
-
-    @SuppressLint("HandlerLeak")
-    final Handler poe_handler = new Handler() {
-        public void handleMessage(Message msg) {
-//            Log.d(TAG, getPseState() + " <---------");
-
-//            Log.d(TAG,  "Not Full Screen updateFlag = " + updateFlag);
-            if (updateFlag) {
-                updateFlag = false;
-                if (pseLevel) {
-                    mPoeLevel.setText("PoE 48V OUT");
-                } else {
-                    mPoeLevel.setText("PoE OFF");
-                }
-            }
-            if (voltInput) {
-                mPoeLevel.setText(format("PoE : %02d.%02d V", mValue, sValue));
-            }
-        }
-    };
-
-    @SuppressLint("HandlerLeak")
-    final Handler poe_focus_handler = new Handler() {
-        public void handleMessage(Message msg) {
-//            Log.d(TAG, "Full Screen updateFlag = " + updateFlag);
-            if (updateFlag) {
-                updateFlag = false;
-                if (pseLevel) {
-                    mFocusPoeLevel.setText("PoE : 48V OUT");
-                } else {
-                    mFocusPoeLevel.setText("PoE : OFF");
-                }
-            }
-            if (voltInput) {
-                mFocusPoeLevel.setText(format("PoE : %02d.%02d V", mValue, sValue));
-            }
-        }
-    };
-
-
-    public void mPoeViewTouchHandler() {
-        mViewTouchListener = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        isMove = false;
-                        mTouchX = event.getRawX();
-                        mTouchY = event.getRawY();
-                        mViewX = mParams.x;
-                        mViewY = mParams.y;
-                        mViewX = sParams.x;
-                        mViewY = sParams.y;
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        isMove = true;
-                        int x = (int) (event.getRawX() - mTouchX);
-                        int y = (int) (event.getRawY() - mTouchY);
-                        final int num = 5;
-                        if ((x > -num && x < num) && (y > -num && y < num)) {
-                            isMove = false;
-                            break;
-                        }
-                        mParams.x = mViewX + x;
-                        mParams.y = mViewY + y;
-                        sParams.x = mViewX + x;
-                        sParams.y = mViewY + y;
-                        mManager.updateViewLayout(mPoeView, mParams);
-                        //sManager.updateViewLayout(mFocusPoeView,sParams);
-                        break;
-                }
-                return true;
-            }
-        };
-
-        mPoeView.setOnTouchListener(mViewTouchListener);
-    }
-
-//    public void sendNotification() {
-//        Resources res = getResources();
-//
-//        Intent notificationIntent = new Intent(this, MainActivity.class);
-//        notificationIntent.setAction(sAction);
-//        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-//        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.poe_in);
-//        Notification notification = new NotificationCompat.Builder(this)
-//                .setContentTitle("PoE")
-//                .setTicker("PoE")
-//                .setContentText("Running PoE service")
-//                .setSmallIcon(R.drawable.poe_noti)
-//                .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.poe_large))
-//                .setContentIntent(pendingIntent)
-//                .setOngoing(true).build();
-//        startForeground(iFOREGROUND_SERVICE, notification);
-//    }
-
-    public void startWatchingOEClose() {
-//        Log.d(TAG, "startWatchingOEClose()");
-        closeReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String state = intent.getStringExtra("state");
-//                Log.v(TAG, "Close Screen Broadcast : " + state);
-
-
-                switch (state) {
-                    case "PoE ON":
-//                    poeStart();
-                        sendNotification();
-                        break;
-                    case "PoE OFF":
-//                    poeStop();
-                        exitNotification();
-                        break;
-                    case "close":
-                        exitNotification();
-                        break;
-                }
-            }
-        };
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(closeBroadcast);
-        registerReceiver(closeReceiver, filter);
-    }
-
-
-    public void sendNotification() {
-        Resources res = getResources();
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-            builder.setContentTitle("PoE")
-                    .setContentText("Running PoE service")
-                    .setTicker("PoE")
-                    .setSmallIcon(R.drawable.poe_noti)
-                    .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.poe_large))
-                    .setAutoCancel(true)
-                    .setWhen(System.currentTimeMillis());
-//                    .setDefaults(Notification.DEFAULT_ALL);
-
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                builder.setCategory(Notification.CATEGORY_MESSAGE)
-                        .setPriority(Notification.PRIORITY_HIGH)
-                        .setVisibility(Notification.VISIBILITY_PUBLIC);
-            }
-
-            nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            nm.notify(11000, builder.build());
-
-    }
-
-    public void exitNotification() {
-        if(nm != null) nm.cancel(11000);
-    }
-
 }
