@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal" android:layout_width="wrap_content"
+    android:background="@drawable/view_rounded_overlay"
+    android:layout_height="wrap_content"
+    android:weightSum="1"
+    android:paddingBottom="10dp"
+    android:paddingTop="8dp"
+    android:paddingRight="10dp"
+    android:paddingLeft="10dp"
+    android:layout_marginLeft="20dp"
+    android:layout_marginBottom="20dp"
+    tools:layout_editor_absoluteY="73dp"
+    tools:layout_editor_absoluteX="0dp"
+    android:layout_gravity="bottom"
+    >
+
+
+    <TextView
+        android:id="@+id/focus_poe_level"
+        android:layout_width="210dp"
+        android:layout_height="33dp"
+        android:paddingStart="6dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:text="PoE Checking..."
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#ffff"
+        android:typeface="monospace"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="-6dp"
+        android:layout_marginTop="6dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginBottom="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/focus_level"
+        app:layout_constraintVertical_bias="0.888" />
+
+
+</android.support.constraint.ConstraintLayout>

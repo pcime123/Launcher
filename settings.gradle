@@ -1,0 +1,3 @@
+include ':app', ':manual_lib', ':lib_manual', ':lib_seeeyes'
+project(':lib_manual').projectDir = new File('library')
+project(':lib_seeeyes').projectDir = new File('seeeyes')

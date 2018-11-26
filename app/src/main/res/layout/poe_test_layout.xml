@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="64dp"
+    android:paddingRight="64dp"
+    android:paddingTop="64dp">
+
+    <Button
+        android:text="START CHECK"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/start_check"
+        android:onClick="onClick"
+        android:layout_below="@+id/mpoe_level"
+        android:layout_toStartOf="@+id/spoe_level" />
+
+    <Button
+        android:text="PSE disable"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/pse_disable"
+        android:onClick="onClick"
+        android:layout_below="@+id/pse_enable"
+        android:layout_alignStart="@+id/pse_enable" />
+
+    <Button
+        android:text="vp enable"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/vp_enable"
+        android:onClick="onClick"
+        android:layout_below="@+id/vp_stopcheck"
+        android:layout_toEndOf="@+id/start_check" />
+
+    <Button
+        android:text="PSE enable"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/pse_enable"
+        android:onClick="onClick"
+        android:layout_below="@+id/start_check"
+        android:layout_alignStart="@+id/start_check" />
+
+    <Button
+        android:text="vp disable"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/vp_disable"
+        android:onClick="onClick"
+        android:layout_below="@+id/vp_enable"
+        android:layout_alignStart="@+id/vp_enable" />
+
+    <TextView
+        android:layout_width="125dp"
+        android:layout_height="50dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="10dp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:typeface="monospace"
+        android:textColor="#000000"
+        android:text="PoE: 00"
+        android:id="@+id/mpoe_level"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="130dp"
+        android:layout_height="50dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="10dp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:typeface="monospace"
+        android:textColor="#000000"
+        android:text=".  00 V"
+        android:id="@+id/spoe_level"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/mpoe_level" />
+
+    <Button
+        android:id="@+id/vp_stopcheck"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:onClick="onClick"
+        android:text="stop Check"
+        android:layout_below="@+id/spoe_level"
+        android:layout_toEndOf="@+id/start_check" />
+
+    <TextView
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="10dp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:typeface="monospace"
+        android:background="@drawable/rounded_overlay"
+        android:textColor="#ffffff"
+        android:text="FOCUS : 000/000"
+        android:id="@+id/focus_level"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/spoe_level"
+        android:layout_marginStart="101dp" />
+
+    <Button
+        android:id="@+id/start_focus"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/focus_level"
+        android:layout_below="@+id/focus_level"
+        android:onClick="onClick"
+        android:text="Start Focus" />
+
+    <Button
+        android:id="@+id/reset_focus"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:onClick="onClick"
+        android:text="Reset Focus"
+        android:layout_below="@+id/start_focus"
+        android:layout_alignStart="@+id/start_focus" />
+
+    <Button
+        android:id="@+id/stop_focus"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/start_focus"
+        android:layout_alignBottom="@+id/start_focus"
+        android:layout_toEndOf="@+id/start_focus"
+        android:onClick="onClick"
+        android:text="Stop Focus" />
+
+</RelativeLayout>

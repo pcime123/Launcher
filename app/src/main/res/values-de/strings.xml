@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Launcher</string>
+    <string name="network_camera">Netzwerk Kamera</string>
+    <string name="sdi_camera">SDI-Kamera</string>
+    <string name="hd_analog_camera">HD analoge Kamera</string>
+    <string name="hdmi">HDMI-Betrachter</string>
+    <string name="test_tools">Test Tools</string>
+    <string name="manual">Handbuch</string>
+    <string name="update">Update</string>
+    <string name="file_manager">Dateimanager</string>
+    <string name="settings">"Einstellungen "</string>
+    <string name="intro_01">intro_01</string>
+    <string name="intro_02">intro_02</string>
+    <string name="intro_03">intro_03</string>
+    <string name="cable_tester">Measure Length Cable</string>
+    <string name="welcome" >Willkommen. Bitte wählen Sie eine Sprache aus.</string>
+    <string name="changed" >Danach kann die Sprache frei geändert werden.</string>
+    <string name="app_update">App-Update</string>
+    <string name="tdrc">Koax. Kabel messen</string>
+    <string name="tdru">UTP-Kabel messen</string>
+    <string name="optical">Optical Power Meter</string>
+    <string name="gallery">Galerie</string>
+    <string name="sd_card">Entfernen Sie den externen Speicher</string>
+    <string name="eth_settings">Ethernet-Einrichtung</string>
+    <string name="browser">IP-Browser</string>
+    <string name="my_apps">"Meine Apps "</string>
+
+    <string name="browser_contents">Geben Sie die IP-Adresse der Kamera ein und drücken Sie die OK-Taste, um auf die Seite des Kameraherstellers zu gelangen.\nKlicken Sie auf den Link linken Link zu einer normalen Webseite.</string>
+    <string name="dhcpuse">Im DHCP-Modus wird die gespeicherte IP-Liste nicht angewendet.</string>
+    <string name="pakect">Pakettest</string>
+    <string name="eth_set">Gespeicherte Netzwerkinformationen</string>
+    <string name="ip_address">IP Adresse</string>
+    <string name="netmask">NetMask</string>
+    <string name="gateway">GateWay</string>
+    <string name="dns_server">DNS Server</string>
+    <string name="eth_contens">Drücken Sie die Setup-Taste, um das Netzwerk in die folgenden Informationen zu ändern.</string>
+    <string name="header">Name</string>
+    <string name="close">Nah dran</string>
+    <string name="delete">Löschen</string>
+    <string name="setup">Setup</string>
+    <string name="please_wait">Warten Sie mal......</string>
+    <string name="not_mask">Bitte überprüfen Sie NetMask erneut.</string>
+    <string name="not_dns">Bitte überprüfen Sie die DNS-Adresse erneut.</string>
+    <string name="not_gate">GateWay wird nicht eingegeben und ist auf 0.0.0.0 eingestellt.</string>
+    <string name="time_out">Netzwerk-Timeout aufgetreten Bitte überprüfen Sie die Verbindung und versuchen Sie es erneut.</string>
+    <string name="not_title">Name ist nicht eingetragen</string>
+    <string name="same_title">Es hat den gleichen Namen. Bitte geben Sie einen anderen Namen ein.</string>
+    <string name="mode">Modus</string>
+    <string name="ethernet_configuration">Ethernet-Konfiguration</string>
+    <string name="clear">klar</string>
+    <string name="name_input">Name eingeben ...</string>
+    <string name="add">Hinzufügen</string>
+    <string name="not_ip">Bitte überprüfen Sie die IP-Adresse erneut.</string>
+
+</resources>

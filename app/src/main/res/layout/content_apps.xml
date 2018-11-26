@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/apps_vertical_margin"
+    android:paddingTop="@dimen/apps_vertical_margin"
+    >
+
+    <GridView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/apps_grid"
+        android:gravity="center"
+        android:numColumns="6"
+        android:horizontalSpacing="@dimen/apps_icon_spacing"
+        android:verticalSpacing="@dimen/apps_icon_spacing"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+</RelativeLayout>

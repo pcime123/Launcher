@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false">
+    <item android:drawable="@drawable/loader_flash_of_light_01" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_02" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_03" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_04" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_05" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_06" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_07" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_08" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_09" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_10" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_11" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_12" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_13" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_14" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_15" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_16" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_17" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_18" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_19" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_20" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_21" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_22" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_23" android:duration="30"/>
+    <item android:drawable="@drawable/loader_flash_of_light_24" android:duration="30"/>
+</animation-list>
