@@ -41,14 +41,14 @@
     <string name="please_wait">잠시만 기다리십시오......</string>
     <string name="not_mask">NetMask를 다시 확인하십시오.</string>
     <string name="not_dns">DNS 주소를 다시 확인하십시오.</string>
-    <string name="not_gate">GateWay가 입력되지 않아 0.0.0.0으로 설정합니다.</string>
+    <string name="not_gate">GateWay를 다시 확인하십시오.</string>
     <string name="time_out">네트워크 설정을 실패했습니다. 연결 상태 확인 후 다시 시도하십시오.</string>
     <string name="not_title">이름이 입력되지 않았습니다.</string>
     <string name="same_title">동일한 이름이 존재합니다. 다른 이름을 입력하십시오.</string>
     <string name="mode">모드</string>
     <string name="ethernet_configuration">이더넷 구성</string>
     <string name="clear">삭제</string>
-    <string name="name_input">이름 입력...</string>
+    <string name="name_input">이름 입력…</string>
     <string name="add">추가</string>
     <string name="not_ip">IP 주소를 다시 확인하십시오.</string>
     <string name="factory_network_string1">네트워크 카메라를 PoE(Power of Ethernet, 30W) 전원공급으로 손쉽게 연결이 가능합니다.</string>
@@ -95,7 +95,7 @@
     <string name="factory_quick_string3">파일 매니저 : 외부 디스크로 데이터를 이동하거나 복사할 수 있습니다.</string>
     <string name="factory_quick_string4">매뉴얼 : 모니터 동작 관련 도움말을 확인할 수 있습니다.</string>
     <string name="factory_quick_string5">IP 브라우저 : IP 주소를 입력하여 카메라 페이지에 접속하거나 일반 웹 브라우저에 접속할 수 있습니다.</string>
-    <string name="factory_quick_string6">이더넷 설정 : 자주 사용하는 이더넷 정보를 저장하여 빠르게 재 설정할 수 있습니다.</string>
+    <string name="factory_quick_string6">이더넷 구성 : 자주 사용하는 이더넷 정보를 저장하여 빠르게 재 설정할 수 있습니다.</string>
     <string name="factory_quick_string7">외부 장치 해제 : Micro SD 카드 또는 USB 에 데이터를 저장했을 때 해당 기능을 사용하지 않고 외부 장치를 제거하면 데이터가 손실될 수 있습니다. 꼭 외부 장치 해제를 한 뒤에 제거해야 합니다.</string>
     <string name="external_title">외부 장치 해제</string>
     <string name="external_body">외부 장치를 해제 하시겠습니까?</string>

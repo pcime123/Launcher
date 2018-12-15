@@ -52,9 +52,8 @@ public class PoEIntentService extends IntentService {
     BroadcastReceiver mAppBroadcastReceiver;
     private NotificationManager nm;
     private BroadcastReceiver closeReceiver = null;
-    private final String closeBroadcast = "net.biyee.onviferenterprise.OnviferActivity";
-    private final String viewerBroadcast = "com.sscctv.seeeyesmonitor";
     private BroadcastReceiver viewerReceiver = null;
+    private BroadcastReceiver controlReceiver = null;
     private TextView mPoeLevel, mFocusLevel, mFocusPoeLevel;
 
     private View mPoeView, mFocusPoeView;
@@ -67,7 +66,6 @@ public class PoEIntentService extends IntentService {
     private boolean isMove = false;
 
     private int mFocusLevelMax;
-    private String sourceId;
 
     private boolean isRunning;
     private boolean screenState;
@@ -87,7 +85,7 @@ public class PoEIntentService extends IntentService {
     public void onCreate() {
         super.onCreate();
         mContext = this;
-        Log.d(TAG, "onCreate() ");
+//        Log.d(TAG, "onCreate() ");
         gpioPortSet();
         LayoutInflater poe_Inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         assert poe_Inflater != null;
@@ -116,7 +114,6 @@ public class PoEIntentService extends IntentService {
         sManager.addView(mFocusPoeView, sParams);
         mFocusPoeView.setVisibility(View.INVISIBLE);
 
-        startWatchingOEBroadcast();
 
     }
 
@@ -137,16 +134,16 @@ public class PoEIntentService extends IntentService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        Log.d(TAG, "Start service in foreground ");
+//        Log.d(TAG, "Start service in foreground ");
 //        sendNotification();
         //if (mMcuControl == null) {
         startWatchingOEClose();
         startWatchingViewerClose();
-        startTest();
+        startPoEViewCotrol();
+        startWatchingOEBroadcast();
 
-        sourceId = VideoSource.IPC;
         mMcuControl = new McuControl();
-        mMcuControl.start(sourceId);
+        mMcuControl.start(VideoSource.IPC);
         startPoeCheck();
         try {
             mMcuControl.startPoeCheck();
@@ -174,17 +171,17 @@ public class PoEIntentService extends IntentService {
     public void onDestroy() {
         isRunning = false;
 
-        stopTest();
         stopWatchingOEBroadcast();
         stopWatchingOEClose();
         stopWatchingViewerClose();
+        stopPoEViewCotrol();
         stopPoeCheck();
         mMcuControl.stop();
         mMcuControl.removeReceiveBufferListener(mLevelMeterListener);
         mMcuControl = null;
+        exitNotification();
 
-
-        Toast.makeText(this, "PoE Service Destroy", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "PoE Service Destroy", Toast.LENGTH_SHORT).show();
         if (mPoeView != null) {
             mManager.removeView(mPoeView);
         }
@@ -211,7 +208,6 @@ public class PoEIntentService extends IntentService {
                     updateFlag = true;
 //                    Log.d(TAG, "Resume pfLevel = " + screenState);
                 }
-
                 if (state != null && state.equals("pause")) {
                     screenState = false;
                     mFocusPoeView.setVisibility(View.INVISIBLE);
@@ -221,10 +217,8 @@ public class PoEIntentService extends IntentService {
                     } catch (IOException | InterruptedException e) {
                         e.printStackTrace();
                     }
-
                     updateFlag = true;
 //                    Log.d(TAG, "Pause pfLevel " + screenState);
-
                 }
 
             }
@@ -248,20 +242,32 @@ public class PoEIntentService extends IntentService {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     String state = intent.getStringExtra("state");
-                    Log.v(TAG, "Close Screen Broadcast : " + state);
-
-                    if (state.equals("resume")) {
-                        mMcuControl.stop();
-                        Log.w(TAG, "PoE Volt Check OFF");
-                    } else if (state.equals("pause")) {
-                        mMcuControl.start(sourceId);
-                        Log.w(TAG, "PoE Volt Check ON");
-                    } else if (state.equals("nosignal") || state.equals("signal")) {
-                        mPoeLevel.setText("PoE 48V OUT");
+//                    Log.v(TAG, "Close Screen Broadcast : " + state);
+                    switch (state) {
+                        case "resume":
+                            stopPoeCheck();
+                            mMcuControl.controlStop();
+                            if(getPseState().equals("1")) {
+                                mPoeLevel.setText("PoE 48V OUT");
+                            } else {
+                                mPoeLevel.setText("PoE OFF");
+                            }
+//                        Log.w(TAG, "PoE Volt Check OFF");
+                            break;
+                        case "pause":
+                            startPoeCheck();
+                            mMcuControl.controlStart();
+//                        Log.w(TAG, "PoE Volt Check ON");
+                            break;
+//                        case "nosignal":
+//                        case "signal":
+//                            mPoeLevel.setText("PoE 48V OUT");
+//                            break;
                     }
                 }
             };
             IntentFilter filter = new IntentFilter();
+            String viewerBroadcast = "com.sscctv.seeeyesmonitor";
             filter.addAction(viewerBroadcast);
             registerReceiver(viewerReceiver, filter);
         }
@@ -273,53 +279,32 @@ public class PoEIntentService extends IntentService {
         }
     }
 
-    public void startTest() {
-        if (mAppBroadcastReceiver == null) {
-            mAppBroadcastReceiver = new BroadcastReceiver() {
+    public void startPoEViewCotrol() {
+        if (controlReceiver == null) {
+            controlReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     String state = intent.getStringExtra("location");
-                    Log.v(TAG, "Input BroadCast : " + state);
                     switch (state) {
-                        case "center":
-                            mParams.gravity = Gravity.TOP | Gravity.CENTER;
-                            break;
-                        case "right":
-                            mParams.gravity = Gravity.TOP | Gravity.RIGHT;
-                            break;
-                        case "left":
-                            mParams.gravity = Gravity.TOP | Gravity.LEFT;
-                            break;
-                        case "bottom":
-                            mParams.gravity = Gravity.TOP | Gravity.BOTTOM;
+                        case "open":
+                            mPoeView.setVisibility(View.VISIBLE);
                             break;
                         case "close":
                             mPoeView.setVisibility(View.INVISIBLE);
                             break;
-                        case "open":
-                            mPoeView.setVisibility(View.VISIBLE);
-                            break;
-
                     }
-//                if(mManager == null){
-                    mManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-                    assert mManager != null;
-                    mManager.updateViewLayout(mPoeView, mParams);
-//                }
-
-//                mPoeView.setVisibility(View.INVISIBLE);
                 }
             };
             IntentFilter filter = new IntentFilter();
-            String appBroadcast = "com.sscctv.poeView";
-            filter.addAction(appBroadcast);
-            registerReceiver(mAppBroadcastReceiver, filter);
+            String viewerBroadcast = "com.sscctv.poeView";
+            filter.addAction(viewerBroadcast);
+            registerReceiver(controlReceiver, filter);
         }
     }
 
-    public void stopTest() {
-        if (mAppBroadcastReceiver != null) {
-            unregisterReceiver(mAppBroadcastReceiver);
+    public void stopPoEViewCotrol() {
+        if (controlReceiver != null) {
+            unregisterReceiver(controlReceiver);
         }
     }
 
@@ -340,6 +325,7 @@ public class PoEIntentService extends IntentService {
                         levelUpdate = true;
                         break;
                 }
+//                Log.d(TAG, "levelUpdate: " + levelUpdate);
                 if (levelUpdate) {
 
                     levelUpdate = false;
@@ -353,7 +339,7 @@ public class PoEIntentService extends IntentService {
                         Message poe_msg = poe_handler.obtainMessage();
                         poe_handler.sendMessage(poe_msg);
                     }
-                    Log.d(TAG, "PoE Volt: " + mValue + " . " + sValue + " V ");
+//                    Log.d(TAG, "PoE Volt: " + mValue + " . " + sValue + " V ");
 
                 }
             }
@@ -377,16 +363,14 @@ public class PoEIntentService extends IntentService {
     }
 
     public void voltCheckState() {
-//        Log.d(TAG, "Volt Check ?" + voltInput + "  " + mValue);
         if ((!voltInput) && (mValue != 0)) {
             voltInput = true;
             vpDisable();
-//            Log.d(TAG, "Voltage Input");
         } else if ((voltInput) && (mValue == 0)) {
+//            Log.d(TAG, "Volt Input: " + voltInput + " mValue: " + mValue);
             voltInput = false;
             updateFlag = true;
             vpEnable();
-//            Log.d(TAG, "Voltage Output");
         }
     }
 
@@ -394,8 +378,6 @@ public class PoEIntentService extends IntentService {
     @SuppressLint("HandlerLeak")
     final Handler poe_handler = new Handler() {
         public void handleMessage(Message msg) {
-//            Log.d(TAG, getPseState() + " <---------");
-
 //            Log.d(TAG,  "Not Full Screen updateFlag = " + updateFlag);
             if (updateFlag) {
                 updateFlag = false;
@@ -430,41 +412,38 @@ public class PoEIntentService extends IntentService {
     };
 
 
+    @SuppressLint("ClickableViewAccessibility")
     public void mPoeViewTouchHandler() {
-        mViewTouchListener = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
+        mViewTouchListener = (v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    isMove = false;
+                    mTouchX = event.getRawX();
+                    mTouchY = event.getRawY();
+                    mViewX = mParams.x;
+                    mViewY = mParams.y;
+                    mViewX = sParams.x;
+                    mViewY = sParams.y;
+                    break;
+                case MotionEvent.ACTION_UP:
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    isMove = true;
+                    int x = (int) (event.getRawX() - mTouchX);
+                    int y = (int) (event.getRawY() - mTouchY);
+                    final int num = 5;
+                    if ((x > -num && x < num) && (y > -num && y < num)) {
                         isMove = false;
-                        mTouchX = event.getRawX();
-                        mTouchY = event.getRawY();
-                        mViewX = mParams.x;
-                        mViewY = mParams.y;
-                        mViewX = sParams.x;
-                        mViewY = sParams.y;
                         break;
-                    case MotionEvent.ACTION_UP:
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        isMove = true;
-                        int x = (int) (event.getRawX() - mTouchX);
-                        int y = (int) (event.getRawY() - mTouchY);
-                        final int num = 5;
-                        if ((x > -num && x < num) && (y > -num && y < num)) {
-                            isMove = false;
-                            break;
-                        }
-                        mParams.x = mViewX + x;
-                        mParams.y = mViewY + y;
-                        sParams.x = mViewX + x;
-                        sParams.y = mViewY + y;
-                        mManager.updateViewLayout(mPoeView, mParams);
-                        //sManager.updateViewLayout(mFocusPoeView,sParams);
-                        break;
-                }
-                return true;
+                    }
+                    mParams.x = mViewX + x;
+                    mParams.y = mViewY + y;
+                    sParams.x = mViewX + x;
+                    sParams.y = mViewY + y;
+                    mManager.updateViewLayout(mPoeView, mParams);
+                    break;
             }
+            return true;
         };
 
         mPoeView.setOnTouchListener(mViewTouchListener);
@@ -480,23 +459,21 @@ public class PoEIntentService extends IntentService {
                     String state = intent.getStringExtra("state");
 //                Log.v(TAG, "Close Screen Broadcast : " + state);
 
-
                     switch (state) {
                         case "PoE ON":
-//                    poeStart();
                             sendNotification();
+                            poeStart();
                             break;
                         case "PoE OFF":
-//                    poeStop();
                             exitNotification();
+                            poeStop();
                             break;
-                        case "close":
-                            exitNotification();
-                            break;
+
                     }
                 }
             };
             IntentFilter filter = new IntentFilter();
+            String closeBroadcast = "net.biyee.onviferenterprise.OnviferActivity";
             filter.addAction(closeBroadcast);
             registerReceiver(closeReceiver, filter);
         }
@@ -508,10 +485,9 @@ public class PoEIntentService extends IntentService {
         }
     }
 
-
     public void sendNotification() {
         Resources res = getResources();
-
+        isRunning = true;
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setContentTitle("PoE")
                 .setContentText("Running PoE service")
@@ -534,13 +510,14 @@ public class PoEIntentService extends IntentService {
     }
 
     public void exitNotification() {
+        isRunning = false;
         if (nm != null) nm.cancel(11000);
     }
 
     private void startPoeCheck() {
         try {
             mMcuControl.startPoeCheck();
-            poeVoltCheckOn();
+//            poeVoltCheckOn();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -549,7 +526,7 @@ public class PoEIntentService extends IntentService {
     private void stopPoeCheck() {
         try {
             mMcuControl.stopPoeCheck();
-            poeVoltCheckOff();
+//            poeVoltCheckOff();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -593,12 +570,12 @@ public class PoEIntentService extends IntentService {
     }
 
     public void poeStart() {
-        vpDisable();
+        vpEnable();
         pseEnable();
     }        // PoE Start
 
     public void poeStop() {
-        vpEnable();
+        vpDisable();
         pseDisable();
     }         // PoE Stop
 

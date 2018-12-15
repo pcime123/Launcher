@@ -12,11 +12,36 @@
     <LinearLayout
         android:id="@+id/title_line"
         android:layout_width="1293dp"
-        android:layout_height="41dp"
+        android:layout_height="51dp"
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+<!--
+        <TextView
+            style="@style/TextViewSwitch"
+            android:text="PoE Off"
+            android:layout_marginTop="13dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="5dp"
+            android:textColor="@color/Graytext"/>
+
+        <Switch
+            android:id="@+id/ethernet_switch"
+            style="@style/Switch"
+            android:layout_width="wrap_content"
+            android:layout_height="26dp"
+            android:layout_marginTop="10dp"
+            android:checked="false"
+            />
+
+        <TextView
+            style="@style/TextViewSwitch"
+            android:text="PoE On"
+            android:layout_marginTop="13dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:textColor="@color/Graytext"/> -->
         <!--<ImageView-->
         <!--android:id="@+id/eth_state"-->
         <!--android:layout_width="50dp"-->
@@ -44,7 +69,7 @@
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
 
-        android:layout_height="222dp"
+        android:layout_height="212dp"
         android:baselineAligned="false"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -57,7 +82,7 @@
             android:layout_width="280dp"
             android:layout_height="190dp"
             android:layout_marginStart="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/selector_ip"
             android:gravity="start|bottom"
             android:paddingBottom="15dp"
@@ -80,7 +105,7 @@
             android:layout_width="225dp"
             android:layout_height="190dp"
             android:layout_marginStart="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/selector_sdi"
             android:gravity="start|bottom"
             android:paddingBottom="15dp"
@@ -103,7 +128,7 @@
             android:layout_width="225dp"
             android:layout_height="190dp"
             android:layout_marginStart="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/selector_analog"
             android:gravity="start|bottom"
             android:paddingBottom="15dp"
@@ -128,7 +153,7 @@
             android:layout_marginBottom="15dp"
             android:layout_marginEnd="40dp"
             android:layout_marginStart="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/selector_hdmi"
             android:gravity="start|bottom"
             android:paddingBottom="15dp"
@@ -285,7 +310,7 @@
             android:layout_width="678dp"
             android:layout_height="100dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="10dp"
             android:baselineAligned="false"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
@@ -360,7 +385,7 @@
             android:layout_height="50dp"
 
             android:layout_marginStart="14dp"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="90dp"
             android:baselineAligned="false"
             android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent"

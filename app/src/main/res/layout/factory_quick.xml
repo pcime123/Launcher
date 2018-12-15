@@ -46,16 +46,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/sub_0" />
 
-        <TextView
-            android:id="@+id/tvSub1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="@string/factory_quick_string4"
-            android:textColor="#ffffff"
-            android:textSize="@dimen/factory_sub"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/sub_1" />
 
         <TextView
             android:id="@+id/tvSub2"
@@ -66,7 +56,7 @@
             android:textColor="#ffffff"
             android:textSize="@dimen/factory_sub"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvSub1" />
+            app:layout_constraintTop_toBottomOf="@id/sub_1" />
 
         <TextView
             android:id="@+id/tvSub3"
@@ -89,7 +79,17 @@
             android:textSize="@dimen/factory_sub"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvSub3" />
-
+ <!--       <TextView
+            android:id="@+id/tvSub1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/factory_quick_string4"
+            android:textColor="#ffffff"
+            android:textSize="@dimen/factory_sub"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvSub4" />
+-->
         <TextView
             android:id="@+id/btn_next"
             android:layout_width="50dp"
@@ -99,10 +99,13 @@
             />
         <TextView
             android:id="@+id/btn_dismiss"
-            android:layout_width="80dp"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:layout_marginBottom="8dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_marginBottom="2dp"
             android:layout_marginEnd="8dp"
             android:gravity="center"
             android:text="@string/dismiss"

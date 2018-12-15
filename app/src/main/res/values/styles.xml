@@ -33,6 +33,22 @@
 
     </style>
 
+    <style name="TextViewSwitch" parent="@android:style/TextAppearance.Large">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerVertical">true</item>
+    </style>
+
+    <style name="Switch">
+        <item name="android:thumb">@drawable/thumb</item>
+        <item name="android:track">@drawable/track</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:switchMinWidth">10dp</item>
+        <item name="android:textOff">"      "</item>
+        <item name="android:textOn">"      "</item>
+    </style>
 
 
 </resources>

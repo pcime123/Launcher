@@ -40,8 +40,8 @@
     <string name="setup">設定</string>
     <string name="please_wait">少々お待ちください…</string>
     <string name="not_mask">NetMaskを再確認してください。</string>
-    <string name="not_dns">DNS アドレスを再確認してください。</string>
-    <string name="not_gate">GateWayが入力されなかったため、0.0.0.0に設定します。</string>
+    <string name="not_dns">DNSアドレスを再確認してください。</string>
+    <string name="not_gate">GateWayアドレスを再確認してください。</string>
     <string name="time_out">ネットワーク設定に失敗しました。 接続状態を確認した後、再度試してください。</string>
     <string name="not_title">名前が入力されていません。</string>
     <string name="same_title">同じ名前が存在します。 他の名前を入力してください。</string>

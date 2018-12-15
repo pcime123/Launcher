@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -34,14 +35,20 @@ import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -89,8 +96,6 @@ public class MainActivity extends AppCompatActivity {
     private McuControl mMcuControl;
     private boolean catchValue = false;
     private final String closeBroadcast = "net.biyee.onviferenterprise.OnviferActivity";
-
-
     private BroadcastReceiver closeReceiver = null;
 
     final String CONNECTIVITY_CHANGE = "android.net.conn.CONNECTIVITY_CHANGE";
@@ -133,12 +138,16 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.date_text)
     TextView dateNow;
 
+//    @BindView(R.id.ethernet_switch)
+//    Switch ethSwitch;
+
 
 //    @BindView(R.id.sdcard_state)
 //    Button sdcard_state;
 
     private FancyShowCaseView mNetwork, mSdi, mAnalog, mHdmi, mTdr, mEtc, mSub;
     private FancyShowCaseQueue mQueue;
+    private Context mContext;
 
 
     @Override
@@ -147,8 +156,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
+        mContext = this;
         doFirst();
+//        startService();
 
         MainTimerTask timerTask = new MainTimerTask();
         mTimer = new Timer();
@@ -167,7 +177,27 @@ public class MainActivity extends AppCompatActivity {
 
         mMcuControl = new McuControl();
 
+
+
+//        ethSwitch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+//                if(b) {
+//                    setPoE(mContext, true);
+//                }else {
+//                    setPoE(mContext, false);
+//                }
+//            }
+//        });
     }
+
+    public static void setPoE(Context context, boolean bPoE) {
+        Intent intent = new Intent();
+        intent.setAction("net.biyee.onviferenterprise.OnviferActivity");
+        intent.putExtra("state", bPoE ? "PoE ON" : "PoE OFF");
+        context.sendBroadcast(intent);
+    }
+
 
     private void gpioPortSet() {
         try {
@@ -329,18 +359,18 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.main_network)
     void onClick_network() {
-        if(SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
             return;
         }
         mLastClickTime = SystemClock.elapsedRealtime();
-//        startService();
+        startService();
         mIntent = getPackageManager().getLaunchIntentForPackage("net.biyee.onviferenterprise");
         startActivity(mIntent);
     }
 
     @OnClick(R.id.main_sdi)
     void onClick_sdi() {
-        if(SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
             return;
         }
         mIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
@@ -351,7 +381,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.main_analog)
     void onClick_analog() {
-        if(SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
             return;
         }
         mIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
@@ -361,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.main_hdmi)
     void onClick_hdmi() {
-        if(SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
             return;
         }
         mIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
@@ -371,7 +401,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.main_tdrc)
     void onClick_tdrc() {
-        if(SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
             return;
         }
         mIntent = getPackageManager().getLaunchIntentForPackage("com.sscctv.tdr");
@@ -380,7 +410,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.main_tdru)
     void onClick_tdru() {
-        if(SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
             return;
         }
         mIntent = getPackageManager().getLaunchIntentForPackage("com.sscctv.tdru");
@@ -389,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.main_apps)
     void onClick_apps() {
-        if(SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
             return;
         }
         mIntent = new Intent(this, AppsActivity.class);
@@ -399,7 +429,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("WrongConstant")
     @OnClick(R.id.main_update)
     void onClick_update() {
-        if(SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
             return;
         }
         mIntent = getPackageManager().getLaunchIntentForPackage("app_update.sscctv.com.app_update");
@@ -430,6 +460,13 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.sub_gallery)
     void onClick_gallery() {
+//        Process process;
+//        try {
+//            Runtime.getRuntime().exec("input keyevent 120");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
         mIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("content://media/internal/images/media"));
         startActivity(mIntent);
     }
@@ -581,6 +618,7 @@ public class MainActivity extends AppCompatActivity {
         stopBroadCastClose();
         stopBroadCastReceive();
         stopBroadCastSdcard();
+        stopService();
         super.onDestroy();
     }
 
@@ -594,20 +632,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void stopBroadCastSdcard() {
-        if(mBRSdcard != null) {
+        if (mBRSdcard != null) {
             unregisterReceiver(mBRSdcard);
         }
     }
 
 
     public void stopBroadCastClose() {
-        if(closeReceiver != null) {
+        if (closeReceiver != null) {
             unregisterReceiver(closeReceiver);
         }
     }
 
     public void stopBroadCastReceive() {
-        if(receiver != null) {
+        if (receiver != null) {
             unregisterReceiver(receiver);
 
         }
@@ -634,14 +672,21 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
         receiver = new IsNetworkReceiver(this);
         registerReceiver(receiver, wifi_filter);
-        startWatchingOEClose();
+        checkPoeState();
         startStatusService();
         try {
             sdCard_check();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+//
+//        if (getPseState().equals("0")) {
+//            ethSwitch.setChecked(false);
+//            pseDisable();
+//        } else if (getPseState().equals("1")) {
+//            ethSwitch.setChecked(true);
+//            pseEnable();
+//        }
 
     }
 
@@ -879,36 +924,30 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.d(TAG, "KeyCode: " +keyCode + " KeyEvent: " + event);
+//        Log.d(TAG, "KeyCode: " +keyCode + " KeyEvent: " + event);
 
         return super.onKeyDown(keyCode, event);
     }
 
 
-
-    public void startWatchingOEClose() {
+    public void checkPoeState() {
 //        Log.d(TAG, "startWatchingOEClose()");
         closeReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String state = intent.getStringExtra("state");
                 Log.v(TAG, "Close Screen Broadcast : " + state);
-
                 switch (state) {
-                    case "close":
-                        stopService();
-//                    Log.d(TAG, "Close OE");
-                        break;
                     case "PoE ON":
+//                        ethSwitch.setChecked(true);
                         poeStart();
-//                    Log.d(TAG, "PoE Start");
                         break;
                     case "PoE OFF":
+//                        ethSwitch.setChecked(false);
                         poeStop();
-//                    Log.d(TAG, "PoE Stop");
                         break;
-                    default:
-                        startService();
+                    case "close":
+                        stopService();
                         break;
                 }
             }
@@ -917,7 +956,6 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction(closeBroadcast);
         registerReceiver(closeReceiver, filter);
     }
-
 
 
     private void startService() {
@@ -931,11 +969,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopService() {
         if (catchValue) {
+            catchValue = false;
             Intent poeIntent = new Intent(this, PoEIntentService.class);
             stopService(poeIntent);
             Log.d(TAG, "Stop Catch Value = " + catchValue);
         }
-        catchValue = false;
     }
 
     private void startStatusService() {
@@ -979,6 +1017,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void vpDisable() {
+        Log.d(TAG, "Vp disable");
         // VP Pin Select: IPM external 48V output
         try {
             opt.writeBytes("echo 0 > /sys/class/gpio_sw/PE11/data\n");
@@ -988,6 +1027,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void poeStart() {
+        Log.d(TAG, "PoE Start");
         vpDisable();
         pseEnable();
     }        // PoE Start
@@ -997,6 +1037,20 @@ public class MainActivity extends AppCompatActivity {
         pseDisable();
     }         // PoE Stop
 
+    public String getPseState() {
+        String sValue = "";
+
+        try {
+            Process p = Runtime.getRuntime().exec("cat /sys/class/gpio_sw/PE17/data");
+            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            sValue = input.readLine();
+            input.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return sValue;
+    }
 
     public class IsNetworkReceiver extends BroadcastReceiver {
 
