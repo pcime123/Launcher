@@ -14,8 +14,8 @@
     <string name="intro_02">intro_02</string>
     <string name="intro_03">intro_03</string>
     <string name="cable_tester">Measure Length Cable</string>
-    <string name="welcome" >Willkommen. Bitte wählen Sie eine Sprache aus.</string>
-    <string name="changed" >Danach kann die Sprache frei geändert werden.</string>
+    <string name="welcome">Willkommen. Bitte wählen Sie eine Sprache aus.</string>
+    <string name="changed">Danach kann die Sprache frei geändert werden.</string>
     <string name="app_update">App-Update</string>
     <string name="tdrc">Koax. Kabel messen</string>
     <string name="tdru">UTP-Kabel messen</string>
@@ -105,5 +105,6 @@
     <string name="dismiss">Dismiss</string>
     <string name="next">Next</string>
     <string name="factory_popup">"Thank you for your purchase :) Functional description guide is available for first-time buyers. Would you like to see the guide? "</string>
+    <string name="not_install">The app is not installed. </string>
 
 </resources>

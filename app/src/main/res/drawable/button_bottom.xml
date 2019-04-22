@@ -8,7 +8,23 @@
             <corners android:radius="400dp" />
         </shape>
     </item>
-    <item android:state_pressed="false">
+    <!--<item android:state_pressed="false">-->
+        <!--<shape>-->
+            <!--<padding android:bottom="4dp" android:left="8dp" android:right="8dp" android:top="4dp" />-->
+            <!--<solid android:color="#d7d7d7" />-->
+            <!--<corners android:radius="600dp" />-->
+        <!--</shape>-->
+    <!--</item>-->
+
+    <item android:state_focused="true">
+        <shape>
+            <padding android:bottom="4dp" android:left="8dp" android:right="8dp" android:top="4dp" />
+            <solid android:color="#858585" />
+            <corners android:radius="600dp" />
+        </shape>
+    </item>
+
+    <item android:state_enabled="false">
         <shape>
             <padding android:bottom="4dp" android:left="8dp" android:right="8dp" android:top="4dp" />
             <solid android:color="#d7d7d7" />

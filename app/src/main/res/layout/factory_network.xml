@@ -20,7 +20,8 @@
             android:text="@string/network_camera"
             android:textColor="#E91E63"
             android:textSize="@dimen/factory_main"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/sub_0"
@@ -94,16 +95,17 @@
             android:id="@+id/btn_dismiss"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:layout_marginBottom="2dp"
             android:layout_marginEnd="8dp"
             android:gravity="center"
             android:text="@string/dismiss"
-            android:textColor="#E91E63"
-            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_rounded_selector"
+            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -111,16 +113,17 @@
             android:id="@+id/btn_next"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:layout_marginBottom="2dp"
             android:layout_marginEnd="8dp"
             android:gravity="center"
             android:text="@string/next"
-            android:textColor="#E91E63"
-            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_rounded_selector"
+            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

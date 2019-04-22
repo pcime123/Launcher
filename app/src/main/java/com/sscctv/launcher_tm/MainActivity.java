@@ -1,25 +1,22 @@
 package com.sscctv.launcher_tm;
 
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlarmManager;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.PixelFormat;
-import android.graphics.drawable.ColorDrawable;
-import android.media.AudioManager;
-import android.media.SoundPool;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.EthernetManager;
-import android.net.IpConfiguration;
 import android.net.NetworkInfo;
 import android.net.StaticIpConfiguration;
 import android.net.Uri;
@@ -32,26 +29,21 @@ import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.sscctv.seeeyes.VideoSource;
 import com.sscctv.seeeyes.ptz.McuControl;
 
 import java.io.BufferedReader;
@@ -63,13 +55,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -83,20 +72,24 @@ import me.toptas.fancyshowcase.OnViewInflateListener;
 public class MainActivity extends AppCompatActivity {
 
     private Timer mTimer;
-    private static final String TAG = "Launcher_Activity";
+    private static final String TAG = "Launcher_1904161800";
     private static final String NETWORK_PREFERENCE = "NETWORK_PREFERENCE";
     private static final String EXTRA_SOURCE = "com.sscctv.seeeyesmonitor.source";
     private static final String SOURCE_SDI = "sdi";
     private static final String SOURCE_AUTO = "auto";
     private static final String SOURCE_HDMI = "hdmi";
     private long mLastClickTime;
-    private PopupWindow popupWindow;
     private DataOutputStream opt;
     private Intent mIntent;
-    private McuControl mMcuControl;
+    private Intent installIntent;
+
     private boolean catchValue = false;
-    private final String closeBroadcast = "net.biyee.onviferenterprise.OnviferActivity";
     private BroadcastReceiver closeReceiver = null;
+    private BroadcastReceiver viewerReceiver = null;
+
+    private Boolean runState = false;
+    private NotificationManager nm;
+
 
     final String CONNECTIVITY_CHANGE = "android.net.conn.CONNECTIVITY_CHANGE";
     private BroadcastReceiver receiver;
@@ -147,22 +140,26 @@ public class MainActivity extends AppCompatActivity {
 
     private FancyShowCaseView mNetwork, mSdi, mAnalog, mHdmi, mTdr, mEtc, mSub;
     private FancyShowCaseQueue mQueue;
-    private Context mContext;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.w(TAG, "onCreate");
+//        Log.w(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
-        mContext = this;
+
         doFirst();
+
+        setContentView(R.layout.activity_main);
+
+//        Log.i(TAG, "Launcher App Data: 201903260921   Version: 2.0.0");
+
+
+        ButterKnife.bind(this);
+        Context mContext = this;
 //        startService();
 
-        MainTimerTask timerTask = new MainTimerTask();
-        mTimer = new Timer();
-        mTimer.schedule(timerTask, 500, 1000);
+//        MainTimerTask timerTask = new MainTimerTask();
+//        mTimer = new Timer();
+//        mTimer.schedule(timerTask, 500, 1000);
 
 
 //        ImageView wifi_state = findViewById(R.id.wifi_state);
@@ -175,29 +172,20 @@ public class MainActivity extends AppCompatActivity {
         portPermission();
         gpioPortSet();
 
-        mMcuControl = new McuControl();
+        McuControl mMcuControl = new McuControl();
+
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 
-
-//        ethSwitch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-//                if(b) {
-//                    setPoE(mContext, true);
-//                }else {
-//                    setPoE(mContext, false);
-//                }
-//            }
-//        });
     }
 
-    public static void setPoE(Context context, boolean bPoE) {
-        Intent intent = new Intent();
-        intent.setAction("net.biyee.onviferenterprise.OnviferActivity");
-        intent.putExtra("state", bPoE ? "PoE ON" : "PoE OFF");
-        context.sendBroadcast(intent);
-    }
-
+//    public static void setPoE(Context context, boolean bPoE) {
+//        Intent intent = new Intent();
+//        intent.setAction("net.biyee.onviferenterprise.OnviferActivity");
+//        intent.putExtra("state", bPoE ? "PoE ON" : "PoE OFF");
+//        context.sendBroadcast(intent);
+//    }
+//
 
     private void gpioPortSet() {
         try {
@@ -212,7 +200,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void test() {
+    private void runGuide() {
+        runState = true;
 
         mNetwork = new FancyShowCaseView.Builder(this)
                 .focusOn(main_network)
@@ -221,12 +210,7 @@ public class MainActivity extends AppCompatActivity {
 //                .disableFocusAnimation()
                 .focusRectAtPosition(290, 280, 500, 330)
                 .roundRectRadius(45)
-                .customView(R.layout.factory_network, new OnViewInflateListener() {
-                    @Override
-                    public void onViewInflated(@NonNull View view) {
-                        setAnimatedContent(view, mNetwork);
-                    }
-                })
+                .customView(R.layout.factory_network, view -> setAnimatedContent(view, mNetwork))
                 .build();
 
         mSdi = new FancyShowCaseView.Builder(this)
@@ -236,12 +220,7 @@ public class MainActivity extends AppCompatActivity {
 //                .disableFocusAnimation()
                 .focusRectAtPosition(790, 280, 395, 330)
                 .roundRectRadius(45)
-                .customView(R.layout.factory_sdi, new OnViewInflateListener() {
-                    @Override
-                    public void onViewInflated(@NonNull View view) {
-                        setAnimatedContent(view, mSdi);
-                    }
-                })
+                .customView(R.layout.factory_sdi, view -> setAnimatedContent(view, mSdi))
                 .build();
 
         mAnalog = new FancyShowCaseView.Builder(this)
@@ -251,12 +230,7 @@ public class MainActivity extends AppCompatActivity {
 //                .disableFocusAnimation()
                 .focusRectAtPosition(1245, 280, 395, 330)
                 .roundRectRadius(45)
-                .customView(R.layout.factory_analog, new OnViewInflateListener() {
-                    @Override
-                    public void onViewInflated(@NonNull View view) {
-                        setAnimatedContent(view, mAnalog);
-                    }
-                })
+                .customView(R.layout.factory_analog, view -> setAnimatedContent(view, mAnalog))
                 .build();
 
         mHdmi = new FancyShowCaseView.Builder(this)
@@ -267,12 +241,7 @@ public class MainActivity extends AppCompatActivity {
                 .focusRectAtPosition(1690, 280, 395, 330)
                 .focusShape(FocusShape.ROUNDED_RECTANGLE)
                 .roundRectRadius(45)
-                .customView(R.layout.factory_hdmi, new OnViewInflateListener() {
-                    @Override
-                    public void onViewInflated(@NonNull View view) {
-                        setAnimatedContent(view, mHdmi);
-                    }
-                })
+                .customView(R.layout.factory_hdmi, view -> setAnimatedContent(view, mHdmi))
                 .build();
 
         mTdr = new FancyShowCaseView.Builder(this)
@@ -282,12 +251,7 @@ public class MainActivity extends AppCompatActivity {
 //                .disableFocusAnimation()
                 .focusRectAtPosition(400, 640, 720, 275)
                 .roundRectRadius(45)
-                .customView(R.layout.factory_tdr, new OnViewInflateListener() {
-                    @Override
-                    public void onViewInflated(@NonNull View view) {
-                        setAnimatedContent(view, mTdr);
-                    }
-                })
+                .customView(R.layout.factory_tdr, view -> setAnimatedContent(view, mTdr))
                 .build();
 
         mEtc = new FancyShowCaseView.Builder(this)
@@ -297,12 +261,7 @@ public class MainActivity extends AppCompatActivity {
 //                .disableFocusAnimation()
                 .focusRectAtPosition(1350, 640, 1080, 275)
                 .roundRectRadius(45)
-                .customView(R.layout.factory_apps, new OnViewInflateListener() {
-                    @Override
-                    public void onViewInflated(@NonNull View view) {
-                        setAnimatedContent(view, mEtc);
-                    }
-                })
+                .customView(R.layout.factory_apps, view -> setAnimatedContent(view, mEtc))
                 .build();
 
         mSub = new FancyShowCaseView.Builder(this)
@@ -312,12 +271,7 @@ public class MainActivity extends AppCompatActivity {
 //                .disableFocusAnimation()
                 .focusRectAtPosition(645, 920, 1150, 200)
                 .roundRectRadius(90)
-                .customView(R.layout.factory_quick, new OnViewInflateListener() {
-                    @Override
-                    public void onViewInflated(@NonNull View view) {
-                        setAnimatedContent(view, mSub);
-                    }
-                })
+                .customView(R.layout.factory_quick, view -> setAnimatedContent(view, mSub))
                 .build();
 
         mQueue = new FancyShowCaseQueue();
@@ -332,96 +286,122 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setAnimatedContent(final View view, final FancyShowCaseView fancyShowCaseView) {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
+        new Handler().postDelayed(() -> {
 
-                TextView tvNext = view.findViewById(R.id.btn_next);
-                TextView tvDismiss = view.findViewById(R.id.btn_dismiss);
+            TextView tvNext = view.findViewById(R.id.btn_next);
+            TextView tvDismiss = view.findViewById(R.id.btn_dismiss);
 
-                tvNext.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        fancyShowCaseView.hide();
-                    }
-                });
+            tvNext.setOnClickListener(v -> fancyShowCaseView.hide());
 
-                tvDismiss.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        mQueue.cancel(true);
-                    }
-                });
-            }
+            tvDismiss.setOnClickListener(v -> {
+                runState = false;
+                mQueue.cancel(true);
+            });
         }, 200);
     }
 
     @OnClick(R.id.main_network)
     void onClick_network() {
-        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 600) {
             return;
         }
         mLastClickTime = SystemClock.elapsedRealtime();
-        startService();
+
         mIntent = getPackageManager().getLaunchIntentForPackage("net.biyee.onviferenterprise");
-        startActivity(mIntent);
+        if (mIntent != null) {
+            startService();
+            startActivity(mIntent);
+        } else {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_install), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnClick(R.id.main_sdi)
     void onClick_sdi() {
-        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 600) {
             return;
         }
-        mIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
-        mIntent.putExtra(EXTRA_SOURCE, SOURCE_SDI);
-        startActivity(mIntent);
+        mLastClickTime = SystemClock.elapsedRealtime();
 
+        installIntent = getPackageManager().getLaunchIntentForPackage("com.sscctv.seeeyesmonitor");
+        if (installIntent != null) {
+            mIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
+            mIntent.putExtra(EXTRA_SOURCE, SOURCE_SDI);
+            startActivity(mIntent);
+        } else {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_install), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnClick(R.id.main_analog)
     void onClick_analog() {
-        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 600) {
             return;
         }
-        mIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
-        mIntent.putExtra(EXTRA_SOURCE, SOURCE_AUTO);
-        startActivity(mIntent);
+        mLastClickTime = SystemClock.elapsedRealtime();
+
+        installIntent = getPackageManager().getLaunchIntentForPackage("com.sscctv.seeeyesmonitor");
+        if (installIntent != null) {
+            mIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
+            mIntent.putExtra(EXTRA_SOURCE, SOURCE_AUTO);
+            startActivity(mIntent);
+        } else {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_install), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnClick(R.id.main_hdmi)
     void onClick_hdmi() {
-        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 600) {
             return;
         }
-        mIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
-        mIntent.putExtra(EXTRA_SOURCE, SOURCE_HDMI);
-        startActivity(mIntent);
+        mLastClickTime = SystemClock.elapsedRealtime();
+
+        installIntent = getPackageManager().getLaunchIntentForPackage("com.sscctv.seeeyesmonitor");
+        if (installIntent != null) {
+            mIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
+            mIntent.putExtra(EXTRA_SOURCE, SOURCE_HDMI);
+            startActivity(mIntent);
+        } else {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_install), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnClick(R.id.main_tdrc)
     void onClick_tdrc() {
-        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 600) {
             return;
         }
+        mLastClickTime = SystemClock.elapsedRealtime();
         mIntent = getPackageManager().getLaunchIntentForPackage("com.sscctv.tdr");
-        startActivity(mIntent);
+        if (mIntent != null) {
+            startActivity(mIntent);
+        } else {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_install), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnClick(R.id.main_tdru)
     void onClick_tdru() {
-        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 600) {
             return;
         }
+        mLastClickTime = SystemClock.elapsedRealtime();
+
         mIntent = getPackageManager().getLaunchIntentForPackage("com.sscctv.tdru");
-        startActivity(mIntent);
+        if (mIntent != null) {
+            startActivity(mIntent);
+        } else {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_install), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnClick(R.id.main_apps)
     void onClick_apps() {
-        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 600) {
             return;
         }
+        mLastClickTime = SystemClock.elapsedRealtime();
         mIntent = new Intent(this, AppsActivity.class);
         startActivity(mIntent);
     }
@@ -429,11 +409,16 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("WrongConstant")
     @OnClick(R.id.main_update)
     void onClick_update() {
-        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 600) {
             return;
         }
+        mLastClickTime = SystemClock.elapsedRealtime();
         mIntent = getPackageManager().getLaunchIntentForPackage("app_update.sscctv.com.app_update");
-        startActivity(mIntent);
+        if (mIntent != null) {
+            startActivity(mIntent);
+        } else {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_install), Toast.LENGTH_SHORT).show();
+        }
 
 //        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 //        dialog.setMessage("Preparing...");
@@ -449,8 +434,17 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.main_packet)
     void onClick_packet() {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 600) {
+            return;
+        }
+        mLastClickTime = SystemClock.elapsedRealtime();
+
         mIntent = getPackageManager().getLaunchIntentForPackage("com.sscctv.packetgenerator");
-        startActivity(mIntent);
+        if (mIntent != null) {
+            startActivity(mIntent);
+        } else {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_install), Toast.LENGTH_SHORT).show();
+        }
     }
 
 //    @OnClick(R.id.main_settings)
@@ -460,13 +454,6 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.sub_gallery)
     void onClick_gallery() {
-//        Process process;
-//        try {
-//            Runtime.getRuntime().exec("input keyevent 120");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
         mIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("content://media/internal/images/media"));
         startActivity(mIntent);
     }
@@ -474,6 +461,11 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.sub_manager)
     void onClick_manager() {
         mIntent = getPackageManager().getLaunchIntentForPackage("com.softwinner.explore");
+        if (mIntent != null) {
+            startActivity(mIntent);
+        } else {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_install), Toast.LENGTH_SHORT).show();
+        }
         startActivity(mIntent);
     }
 
@@ -508,7 +500,7 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.sub_sdcard)
     void onClick_sdcard() {
         sdCard_unMount();
-
+//        runGuide();
     }
 
     @OnClick(R.id.sub_browser)
@@ -534,31 +526,20 @@ public class MainActivity extends AppCompatActivity {
         builder.setView(frameLayout);
         hideSoftKeyboard(ip);
 
-        builder.setPositiveButton("Close",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getApplicationContext(), "Nothing", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        builder.setPositiveButton(getResources().getString(R.string.close),
+                (dialog, which) -> Toast.makeText(getApplicationContext(), "Nothing", Toast.LENGTH_SHORT).show());
 
-        builder.setNeutralButton("Web", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String address = "http://www.google.com";
-                mIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(address));
-                startActivity(mIntent);
-            }
+        builder.setNeutralButton("Web", (dialog, which) -> {
+            String address = "http://www.google.com";
+            mIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(address));
+            startActivity(mIntent);
         });
 
-        builder.setNegativeButton("OK",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String address = ip.getText().toString();
-                        mIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://" + address));
-                        startActivity(mIntent);
-                    }
+        builder.setNegativeButton(getResources().getString(R.string.yes),
+                (dialog, which) -> {
+                    String address = ip.getText().toString();
+                    mIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://" + address));
+                    startActivity(mIntent);
                 });
         builder.show();
 
@@ -566,6 +547,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected void hideSoftKeyboard(EditText mSearchView) {
         InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        assert mgr != null;
         mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
     }
 
@@ -611,24 +593,24 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        Log.w(TAG, "onDestroy");
+//        Log.w(TAG, "onDestroy");
 
-        mTimer.cancel();
+//        mTimer.cancel();
         stopStatusService();
         stopBroadCastClose();
         stopBroadCastReceive();
         stopBroadCastSdcard();
-        stopService();
+        stopBroadCastScreen();
+        stopWatchingViewerClose();
+//        stopService();
         super.onDestroy();
     }
 
-    @Override
-    protected void onPause() {
-        Log.w(TAG, "onPause");
-        mTimer.cancel();
-        super.onPause();
 
-
+    public void stopBroadCastScreen() {
+        if (mScreen != null) {
+            unregisterReceiver(mScreen);
+        }
     }
 
     public void stopBroadCastSdcard() {
@@ -652,8 +634,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        Log.i(TAG, "onPause");
+        mTimer.cancel();
+
+        super.onPause();
+
+
+    }
+
+    @Override
     protected void onResume() {
-        Log.w(TAG, "onResume");
+        Log.i(TAG, "onResume");
 
         super.onResume();
         MainTimerTask timerTask = new MainTimerTask();
@@ -672,14 +664,22 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
         receiver = new IsNetworkReceiver(this);
         registerReceiver(receiver, wifi_filter);
+
+        IntentFilter screen_filter = new IntentFilter();
+        screen_filter.addAction(Intent.ACTION_SCREEN_OFF);
+        screen_filter.addAction(Intent.ACTION_SCREEN_ON);
+        registerReceiver(mScreen, screen_filter);
+
         checkPoeState();
+
+        startWatchingViewerClose();
         startStatusService();
         try {
             sdCard_check();
         } catch (IOException e) {
             e.printStackTrace();
         }
-//
+
 //        if (getPseState().equals("0")) {
 //            ethSwitch.setChecked(false);
 //            pseDisable();
@@ -690,6 +690,38 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    BroadcastReceiver mScreen = new BroadcastReceiver() {
+        @Override
+
+        public void onReceive(Context context, Intent intent) {
+
+            String action = intent.getAction();
+            String packageName;
+            ActivityManager am = (ActivityManager) context.getSystemService(Activity.ACTIVITY_SERVICE);
+
+            assert am != null;
+            packageName = am.getRunningAppProcesses().get(0).processName;
+            if (action != null) {
+                if (action.equals(Intent.ACTION_SCREEN_ON)) {
+
+                    Log.i(TAG, "Screen ON: " + packageName);
+                    if (packageName.equals("net.biyee.onviferenterprise")) {
+                        Log.d(TAG, "Screen ON Start Service");
+                        startService();
+                    }
+                }
+                if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                    Log.i(TAG, "Screen OFF");
+//                stopService();
+                    if (packageName.equals("net.biyee.onviferenterprise")) {
+                        Log.d(TAG, "Screen OFF Stop Service");
+                        stopService();
+                    }
+                }
+            }
+        }
+    };
+
 
     BroadcastReceiver mBRSdcard = new BroadcastReceiver() {
         @Override
@@ -697,19 +729,21 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
 
             String action = intent.getAction();
-            if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
+            if (action != null) {
+                if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
 //                sdcard_state.setBackgroundResource(R.drawable.sdcard_in);
 //                sdcard_state.setEnabled(true);
-                sub_sdcard.setEnabled(true);
+                    sub_sdcard.setEnabled(true);
 
-                Log.d(TAG, "SD 카드 삽입");
-            }
-            if (action.equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
+//                Log.d(TAG, "SD 카드 삽입");
+                }
+                if (action.equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
 //                sdcard_state.setBackgroundResource(R.drawable.sdcard_out);
 //                sdcard_state.setEnabled(false);
-                sub_sdcard.setEnabled(false);
+                    sub_sdcard.setEnabled(false);
 
-                Log.d(TAG, "SD 카드 제거");
+//                Log.d(TAG, "SD 카드 제거");
+                }
             }
         }
     };
@@ -725,7 +759,7 @@ public class MainActivity extends AppCompatActivity {
 
             String sLine;
             while ((sLine = input.readLine()) != null) {
-                Log.d(TAG, "sLine: " + sLine);
+//                Log.d(TAG, "sLine: " + sLine);
                 if (sLine.equals("110 0 extsd /storage/extsd 4") || sLine.equals("110 0 usbhost /storage/usbhost 4")) {
                     sub_sdcard.setEnabled(true);
                     return;
@@ -746,49 +780,44 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle(getResources().getString(R.string.external_title));
         builder.setMessage(getResources().getString(R.string.external_body));
         builder.setPositiveButton(getResources().getString(R.string.no),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                (dialog, which) -> {
 //                        Toast.makeText(getApplicationContext(), "Nothing", Toast.LENGTH_SHORT).show();
-                    }
                 });
         builder.setNegativeButton(getResources().getString(R.string.yes),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        try {
-                            Runtime.getRuntime().exec("su -c vdc volume unmount /storage/extsd");
-                            Runtime.getRuntime().exec("su -c vdc volume unmount /storage/usbhost");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-//                        Toast.makeText(getApplicationContext(), "UnMount", Toast.LENGTH_SHORT).show();
+                (dialog, which) -> {
+                    try {
+                        Runtime.getRuntime().exec("su -c vdc volume unmount /storage/extsd");
+                        Runtime.getRuntime().exec("su -c vdc volume unmount /storage/usbhost");
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
+//                        Toast.makeText(getApplicationContext(), "UnMount", Toast.LENGTH_SHORT).show();
                 });
         builder.show();
     }
 
-    private boolean doFirst() {
+    private void doFirst() {
         SharedPreferences pref = getSharedPreferences("doFirst", MODE_PRIVATE);
         boolean doFirst = pref.getBoolean("doFirst", true);
-
+        Log.v(TAG, "MainActivity doFirst: " + doFirst);
         if (doFirst) {
             Intent intent = new Intent(this, FactoryActivity.class);
+            Log.v(TAG, "MainActivity doFirst startActivity()");
             startActivity(intent);
+
             SharedPreferences.Editor editor = pref.edit();
-            editor.putBoolean("doFirst", false);
+            editor.putBoolean("doFirst", true);
             editor.apply();
         }
 
-        Log.d(TAG, "doFirst: " + doFirst);
-        return doFirst;
+//        Log.d(TAG, "doFirst: " + doFirst);
     }
 
     @SuppressLint("WrongConstant")
-    private boolean doSecond() {
+    private void doSecond() {
         SharedPreferences pref = getSharedPreferences("doSecond", MODE_PRIVATE);
         boolean doSecond = pref.getBoolean("doSecond", true);
-//
+//        Log.d(TAG, "Dosecond start: " + doSecond);
 //        int beforeColor;
 //        int afterColor;
 //        ConstraintLayout view = findViewById(R.id.main_view);
@@ -813,17 +842,17 @@ public class MainActivity extends AppCompatActivity {
         if (doSecond) {
             File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Ethernet/");
             if (dir.exists()) {
-                Log.d(TAG, "if Dir Exists: " + dir.exists());
+//                Log.d(TAG, "if Dir Exists: " + dir.exists());
 
                 if (dir.isDirectory()) {
 
                     File[] files = dir.listFiles();
 
-                    for (int i = 0; i < files.length; i++) {
-                        if (files[i].delete()) {
-                            Log.d(TAG, "File Delete: " + files[i].getName());
+                    for (File file : files) {
+                        if (file.delete()) {
+                            Log.d(TAG, "File Delete: " + file.getName());
                         } else {
-                            Log.d(TAG, "Not File Delete: " + files[i].getName());
+                            Log.d(TAG, "Not File Delete: " + file.getName());
 
                         }
                     }
@@ -840,23 +869,14 @@ public class MainActivity extends AppCompatActivity {
 
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
             dialog.setMessage(getResources().getString(R.string.factory_popup));
-            dialog.setPositiveButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    test();
-                }
-            });
-            dialog.setNegativeButton(getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
+            dialog.setPositiveButton(getResources().getString(R.string.yes), (dialog1, which) -> runGuide());
+            dialog.setNegativeButton(getResources().getString(R.string.no), (dialog12, which) -> dialog12.dismiss());
             AlertDialog alert = dialog.create();
             alert.show();
             StaticIpConfiguration mStaticIpConfiguration = new StaticIpConfiguration();
             EthernetManager mEthernetManager;
             mEthernetManager = (EthernetManager) getSystemService("ethernet");
+
             SettingsEthernet ethernet = new SettingsEthernet();
             ethernet.setDefaultIP(mStaticIpConfiguration, mEthernetManager);
 
@@ -865,9 +885,6 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
         }
 
-
-//        Log.d(TAG, "doSecond: " + doSecond);
-        return doSecond;
     }
 
     public void addFirstNetworkInfo(String header, String ipAddr, String netMask, String gateWay, String dnsAddr) {
@@ -922,11 +939,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-//        Log.d(TAG, "KeyCode: " +keyCode + " KeyEvent: " + event);
 
-        return super.onKeyDown(keyCode, event);
+    public void startWatchingViewerClose() {
+//        Log.d(TAG, "startWatchingOEClose()");
+        if (viewerReceiver == null) {
+            viewerReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String state = intent.getStringExtra("state");
+//                    Log.v(TAG, "startWatchingViewerClose Broadcast : " + state);
+                    switch (state) {
+                        case "resume":
+                            break;
+                        case "pause":
+                            break;
+                    }
+                }
+            };
+            IntentFilter filter = new IntentFilter();
+            String viewerBroadcast = "com.sscctv.seeeyesmonitor";
+            filter.addAction(viewerBroadcast);
+            registerReceiver(viewerReceiver, filter);
+        }
+    }
+
+    public void stopWatchingViewerClose() {
+        if (viewerReceiver != null) {
+            unregisterReceiver(viewerReceiver);
+        }
     }
 
 
@@ -936,13 +976,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String state = intent.getStringExtra("state");
-                Log.v(TAG, "Close Screen Broadcast : " + state);
+//                Log.v(TAG, "Screen Broadcast : " + state);
                 switch (state) {
                     case "PoE ON":
 //                        ethSwitch.setChecked(true);
+                        sendNotification();
                         poeStart();
                         break;
                     case "PoE OFF":
+                        exitNotification();
 //                        ethSwitch.setChecked(false);
                         poeStop();
                         break;
@@ -953,8 +995,43 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         IntentFilter filter = new IntentFilter();
+        String closeBroadcast = "net.biyee.onviferenterprise.OnviferActivity";
         filter.addAction(closeBroadcast);
         registerReceiver(closeReceiver, filter);
+    }
+
+    public void sendNotification() {
+
+//        Log.d(TAG, "sendNotification isRunning: " + isRunning);
+        Resources res = getResources();
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setContentTitle("PoE")
+                .setContentText("Running PoE service")
+                .setTicker("PoE")
+                .setSmallIcon(R.drawable.poe_noti)
+                .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.poe_large))
+                .setAutoCancel(true)
+                .setWhen(System.currentTimeMillis());
+//                    .setDefaults(Notification.DEFAULT_ALL);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            builder.setCategory(Notification.CATEGORY_MESSAGE)
+                    .setPriority(Notification.PRIORITY_HIGH)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC);
+        }
+
+        nm.notify(11000, builder.build());
+
+    }
+
+    public void exitNotification() {
+//        Log.d(TAG, "exitNotification: " + nm);
+
+        if (nm != null) {
+            nm.cancel(11000);
+//            Log.d(TAG, "exitNotification cancel: " + nm);
+        }
+
     }
 
 
@@ -963,7 +1040,7 @@ public class MainActivity extends AppCompatActivity {
             catchValue = true;
             Intent poeIntent = new Intent(this, PoEIntentService.class);
             startService(poeIntent);
-            Log.d(TAG, "Start Catch Value = " + catchValue);
+//            Log.d(TAG, "Start Catch Value = " + catchValue);
         }
     }
 
@@ -972,20 +1049,20 @@ public class MainActivity extends AppCompatActivity {
             catchValue = false;
             Intent poeIntent = new Intent(this, PoEIntentService.class);
             stopService(poeIntent);
-            Log.d(TAG, "Stop Catch Value = " + catchValue);
+//            Log.d(TAG, "Stop Catch Value = " + catchValue);
         }
     }
 
     private void startStatusService() {
         Intent statusIntent = new Intent(this, statusService.class);
         startService(statusIntent);
-        Log.d(TAG, "Start Status Service");
+//        Log.d(TAG, "Start Status Service");
     }
 
     private void stopStatusService() {
         Intent statusIntent = new Intent(this, statusService.class);
         stopService(statusIntent);
-        Log.d(TAG, "Start Status Service");
+//        Log.d(TAG, "Start Status Service");
     }
 
 
@@ -1017,7 +1094,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void vpDisable() {
-        Log.d(TAG, "Vp disable");
+//        Log.d(TAG, "Vp disable");
         // VP Pin Select: IPM external 48V output
         try {
             opt.writeBytes("echo 0 > /sys/class/gpio_sw/PE11/data\n");
@@ -1027,13 +1104,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void poeStart() {
-        Log.d(TAG, "PoE Start");
-        vpDisable();
+//        Log.d(TAG, "PoE Start");
+//        vpDisable();
         pseEnable();
     }        // PoE Start
 
     public void poeStop() {
-        vpEnable();
+//        vpEnable();
         pseDisable();
     }         // PoE Stop
 
@@ -1073,25 +1150,30 @@ public class MainActivity extends AppCompatActivity {
 //                Log.d(TAG, "What??");
                 ConnectivityManager conManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo activeNetInfo = conManager.getActiveNetworkInfo();
-                try {
-                    if (activeNetInfo.getTypeName() != null) {
-                        if (activeNetInfo.getTypeName().equals("WIFI")) {
-                            if (isWifi())
-                                Log.d(TAG, "WiFi OK");
-                        }
-                    } else {
+//                try {
+//                    if (activeNetInfo.getTypeName() != null) {
+//                        if (activeNetInfo.getTypeName().equals("WIFI")) {
+//                            if (isWifi()) {
+//                                Log.d(TAG, "WiFi OK");
+                                //TODO
+//                            }
+//                        }
+//                    } else {
+                        //TODO
 //                        wifi_state.setImageResource(R.drawable.wifi_out);
-                        Log.d(TAG, "WiFi Fail");
-                    }
-                } catch (Exception e) {
+//                        Log.d(TAG, "WiFi Fail");
+//                    }
+//                } catch (Exception e) {
 //                    wifi_state.setImageResource(R.drawable.wifi_out);
 //                    Log.d(TAG, "3G Fail");
-                }
-            } else if (WifiManager.RSSI_CHANGED_ACTION.equals(action)) {
-                if (isWifi())
-                    Log.d(TAG, "RSSI CHANGE");
-                else
-                    Log.d(TAG, "RSSI NOT");
+//                }
+//            } else if (WifiManager.RSSI_CHANGED_ACTION.equals(action)) {
+//                if (isWifi()) {
+//                    Log.d(TAG, "RSSI CHANGE");
+//                } else {
+//                    Log.d(TAG, "RSSI NOT");
+
+//                }
             }
         }
 
@@ -1107,23 +1189,23 @@ public class MainActivity extends AppCompatActivity {
                 NetworkInfo.DetailedState ni_ds = WifiInfo.getDetailedStateOf(wInfo.getSupplicantState());
                 if ((wInfo.getIpAddress() > 0 && wInfo.getSSID() != null && wInfo.getSupplicantState().toString().equals("COMPLETED"))
                         && (ni_ds == NetworkInfo.DetailedState.CONNECTED || ni_ds == NetworkInfo.DetailedState.OBTAINING_IPADDR)
-                        ) {
+                ) {
                     // RSSI 는 -100에 가까울수록 안좋고 0에 가까울수록 좋음
-                    if (wInfo.getRssi() < -80 && wInfo.getRssi() > -100) {
+//                    if (wInfo.getRssi() < -80 && wInfo.getRssi() > -100) {
 //                        wifi_state.setImageResource(R.drawable.wifi_in_1);
-                        Log.e(TAG, "WiFi RSSI 1 = " + wInfo.getRssi());
-                    } else if (wInfo.getRssi() < -50 && wInfo.getRssi() > -79) {
+//                        Log.e(TAG, "WiFi RSSI 1 = " + wInfo.getRssi());
+//                    } else if (wInfo.getRssi() < -50 && wInfo.getRssi() > -79) {
 //                        wifi_state.setImageResource(R.drawable.wifi_in_2);
-                        Log.e(TAG, "WiFi RSSI 2 = " + wInfo.getRssi());
+//                        Log.e(TAG, "WiFi RSSI 2 = " + wInfo.getRssi());
 
-                    } else if (wInfo.getRssi() < -30 && wInfo.getRssi() > -49) {
+//                    } else if (wInfo.getRssi() < -30 && wInfo.getRssi() > -49) {
 //                        wifi_state.setImageResource(R.drawable.wifi_in_3);
-                        Log.e(TAG, "WiFi RSSI 3 = " + wInfo.getRssi());
+//                        Log.e(TAG, "WiFi RSSI 3 = " + wInfo.getRssi());
 
-                    } else if (wInfo.getRssi() < -0 && wInfo.getRssi() > -29) {
+//                    } else if (wInfo.getRssi() < -0 && wInfo.getRssi() > -29) {
 //                        wifi_state.setImageResource(R.drawable.wifi_in_4);
-                        Log.e(TAG, "WiFi RSSI 4 = " + wInfo.getRssi());
-                    }
+//                        Log.e(TAG, "WiFi RSSI 4 = " + wInfo.getRssi());
+//                    }
 
                     result = true;
                 }
@@ -1159,8 +1241,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
 //        Log.d(TAG, "KeyCode: " + keyCode + " event: " + event);
-        return super.onKeyUp(keyCode, event);
+
+        return runState;
     }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//        Log.d(TAG, "onKeyDown: " +keyCode + " KeyEvent: " + event);
+
+        return runState;
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -1169,6 +1261,7 @@ public class MainActivity extends AppCompatActivity {
 //            super.onBackPressed();
 //        }
     }
+
 
 }
 

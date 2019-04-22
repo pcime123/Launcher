@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/black">
+    android:background="@color/black"
+    >
 
 
     <TextView
@@ -108,7 +109,8 @@
         android:layout_marginStart="50dp"
         android:layout_marginTop="300dp"
         android:background="@drawable/button_bottom"
-
+        android:textColor="@color/black"
+        android:textSize="20sp"
         android:text="@string/next"
         app:layout_constraintStart_toEndOf="@+id/button_german"
         app:layout_constraintTop_toTopOf="parent" />

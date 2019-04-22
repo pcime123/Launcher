@@ -7,6 +7,8 @@
     android:layout_height="wrap_content"
     android:background="@drawable/view_rounded_overlay"
     android:orientation="horizontal"
+    android:focusableInTouchMode="false"
+    android:focusable="false"
     android:weightSum="1">
 
     <TextView
@@ -20,6 +22,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#ffff"
         android:typeface="monospace"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"

@@ -105,5 +105,6 @@
     <string name="dismiss">Dismiss</string>
     <string name="next">Next</string>
     <string name="factory_popup">"Thank you for your purchase :) Functional description guide is available for first-time buyers. Would you like to see the guide? "</string>
+    <string name="not_install">The app is not installed. </string>
 
 </resources>

@@ -104,5 +104,6 @@
     <string name="factory_popup">ご採用いただきありがとうございます。\nご使用の前に機能説明ガイドを用意しております。\nご覧になりますか?</string>
     <string name="dismiss">終わり</string>
     <string name="next">次に</string>
+    <string name="not_install">アプリが設置されていません。</string>
 
 </resources>

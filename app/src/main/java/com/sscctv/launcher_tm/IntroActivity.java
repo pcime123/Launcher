@@ -44,7 +44,7 @@ public class IntroActivity extends Activity {
        public void onClick(View v) {
            finish();
            popupWindow.dismiss();
-           Log.d("Intro", "No Button");
+//           Log.d("Intro", "No Button");
        }
    };
 }

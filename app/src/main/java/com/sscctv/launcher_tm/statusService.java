@@ -9,13 +9,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
@@ -41,6 +44,7 @@ import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 
+@RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
 public class statusService extends IntentService {
 
     private static final String TAG = "statusService";
@@ -55,6 +59,7 @@ public class statusService extends IntentService {
     private boolean state1 = false;
     private boolean state2 = false;
     private boolean state4 = false;
+    private SharedPreferences mShared;
 
     public statusService() {
         super("PoEIntentService");
@@ -63,8 +68,17 @@ public class statusService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "onCreate() ");
+//        Log.d(TAG, "onCreate() ");
         getStatus();
+        gpioPortSet();
+        vpEnable();
+
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm1 = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm2 = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+
+        mShared = getSharedPreferences("state", MODE_PRIVATE);
 
 
     }
@@ -75,9 +89,9 @@ public class statusService extends IntentService {
 //        Log.d(TAG, "Start service in foreground ");
 //        sendNotification();
 //        Log.d(TAG, "Timer? " + timer);
-        if(timer == null){
+        if (timer == null) {
             timer = new Timer();
-            timer.schedule(timerTask, 100, 1000);
+            timer.schedule(timerTask, 100, 500);
         }
         state1 = false;
         state2 = false;
@@ -90,7 +104,7 @@ public class statusService extends IntentService {
 //    }
 
     public void stopCheck() {
-        Log.d(TAG, "Stop Service");
+//        Log.d(TAG, "Stop Service");
         if (timer != null) timer.cancel();
         timer = null;
     }
@@ -102,6 +116,12 @@ public class statusService extends IntentService {
             port1_check();
             port2_check();
             port4_check();
+//            Log.d(TAG, "state2 = " + state2);
+//            if(state2) {
+//                vpDisable();
+//            } else {
+//                vpEnable();
+//            }
 
         }
     };
@@ -128,13 +148,33 @@ public class statusService extends IntentService {
         return value;
     }
 
+
+    private void netcfgEthDown() throws IOException {
+        Runtime.getRuntime().exec("su -c netcfg eth0 down");
+    }
+
+    private void netcfgEthUp() throws IOException {
+        Runtime.getRuntime().exec("su -c netcfg eth0 up");
+
+    }
+
     private void port1_check() {
         Resources res = getResources();
 //        Log.d(TAG, "Port 1: " + getPort1Stat() + " State: " + state1);
+        SharedPreferences.Editor editor = mShared.edit();
 
         if (getPort1Stat().equals("1") && !state1) {
 
+            editor.putString("stat1", "in");
+            editor.apply();
+
             state1 = true;
+//            try {
+//                netcfgEthDown();
+//                netcfgEthUp();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
             builder.setContentTitle("Link In CAM Port")
@@ -153,25 +193,49 @@ public class statusService extends IntentService {
                         .setVisibility(Notification.VISIBILITY_PUBLIC);
             }
 
-            nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
             nm.notify(8000, builder.build());
 
 //            }
         } else if (getPort1Stat().equals("0") && state1) {
+
+            editor.putString("stat1", "out");
+            editor.apply();
             state1 = false;
 
-            if(nm != null) nm.cancel(8000);
+//            try {
+//                netcfgEthDown();
+//                netcfgEthUp();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+
+            if (nm != null) nm.cancel(8000);
 
         }
+
 
     }
 
     private void port2_check() {
         Resources res = getResources();
 //        Log.d(TAG, "Port 2: " + getPort2Stat() + " State: " + state2);
+        SharedPreferences.Editor editor = mShared.edit();
 
         if (getPort2Stat().equals("1") && !state2) {
+
+            editor.putString("stat2", "in");
+            editor.apply();
+
             state2 = true;
+
+//            try {
+//                netcfgEthDown();
+//                netcfgEthUp();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            vpDisable();
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
             builder.setContentTitle("Link In NET Port")
@@ -190,14 +254,23 @@ public class statusService extends IntentService {
                         .setVisibility(Notification.VISIBILITY_PUBLIC);
             }
 
-            nm1 = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             nm1.notify(9000, builder.build());
 
 //            }
         } else if (getPort2Stat().equals("0") && state2) {
             state2 = false;
 
-            if(nm1 != null) nm1.cancel(9000);
+            editor.putString("stat2", "out");
+            editor.apply();
+
+//            try {
+//                netcfgEthDown();
+//                netcfgEthUp();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            vpEnable();
+            if (nm1 != null) nm1.cancel(9000);
 
         }
 
@@ -206,10 +279,19 @@ public class statusService extends IntentService {
     private void port4_check() {
         Resources res = getResources();
 //        Log.d(TAG, "Port 4: " + getPort4Stat() + " State: " + state4);
+        SharedPreferences.Editor editor = mShared.edit();
 
         if (getPort4Stat().equals("1") && !state4) {
             state4 = true;
 
+            editor.putString("stat4", "in");
+            editor.apply();
+//            try {
+//                netcfgEthDown();
+//                netcfgEthUp();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
             builder.setContentTitle("Link In SFP Port")
                     .setContentText("Connected to SFP Port")
@@ -227,19 +309,26 @@ public class statusService extends IntentService {
                         .setVisibility(Notification.VISIBILITY_PUBLIC);
             }
 
-            nm2 = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             nm2.notify(10000, builder.build());
 
 //            }
         } else if (getPort4Stat().equals("0") && state4) {
             state4 = false;
 
-            if(nm2 != null) nm2.cancel(10000);
+            editor.putString("stat4", "out");
+            editor.apply();
+
+//            try {
+//                netcfgEthDown();
+//                netcfgEthUp();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+            if (nm2 != null) nm2.cancel(10000);
 
         }
 
     }
-
 
 
     public String getStatus() {
@@ -298,6 +387,39 @@ public class statusService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+    }
+
+    private DataOutputStream opt;
+
+    private void gpioPortSet() {
+        try {
+            Runtime command = Runtime.getRuntime();
+            Process proc;
+
+            proc = command.exec("su");
+            opt = new DataOutputStream(proc.getOutputStream());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SecurityException();
+        }
+    }
+
+    public void vpEnable() {
+        // VP Pin Select: IPM internal 48V output
+        try {
+            opt.writeBytes("echo 0 > /sys/class/gpio_sw/PE11/data\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void vpDisable() {
+        // VP Pin Select: IPM external 48V output
+        try {
+            opt.writeBytes("echo 1 > /sys/class/gpio_sw/PE11/data\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -36,8 +36,8 @@ public class poeActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_poe);
-        mPoeLevel = (TextView) findViewById(R.id.mpoe_level);
-        sPoeLevel = (TextView) findViewById(R.id.spoe_level);
+        mPoeLevel = findViewById(R.id.mpoe_level);
+        sPoeLevel = findViewById(R.id.spoe_level);
         mMcuControl = new McuControl();
 
         gpioPortSet();
@@ -67,7 +67,7 @@ public class poeActivity extends Activity {
         mSource = new VideoSource(sourceId);
         mMcuControl.start(sourceId);
         startLevelMeterHandler();
-        Log.d(TAG, "Source = " + sourceId);
+//        Log.d(TAG, "Source = " + sourceId);
 
     }
 
@@ -90,23 +90,20 @@ public class poeActivity extends Activity {
         mMcuControl.addReceiveBufferListener(new LevelMeterListener() {
             @Override
             public void onLevelChanged(final int level, final int value) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d(TAG, "Level = " + level + ", Value = " + value);
-                        switch (level) {
-                            case MASTER_CHECK_POE:
-                                try {
-                                    mupdatePoeLevel(value);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                break;
-                            case SUB_CHECK_POE:
-                                supdatePoeLevel(value);
-                                break;
+                runOnUiThread(() -> {
+                    Log.d(TAG, "Level = " + level + ", Value = " + value);
+                    switch (level) {
+                        case MASTER_CHECK_POE:
+                            try {
+                                mupdatePoeLevel(value);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        case SUB_CHECK_POE:
+                            supdatePoeLevel(value);
+                            break;
 
-                        }
                     }
                 });
             }

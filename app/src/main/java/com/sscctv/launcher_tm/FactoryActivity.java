@@ -13,8 +13,11 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static java.lang.String.format;
 
 public class FactoryActivity extends Activity {
 
@@ -52,10 +55,34 @@ public class FactoryActivity extends Activity {
 
         if (hasFocus) {
             animationDrawable.start();
+//            factoryHandler.sendEmptyMessageDelayed(0, 3000);
+//            startActivity(new Intent(FactoryActivity.this, LanguageActivity.class));
+//            finish();
 //            decorView.setSystemUiVisibility(uiOption);
             timer();
         }
     }
+
+//    private final factoryHandler factoryHandler = new factoryHandler(this);
+//
+//    private static class factoryHandler extends Handler {
+//        private final WeakReference<FactoryActivity> ref;
+//
+//        private factoryHandler(FactoryActivity test) {
+//            ref = new WeakReference<>(test);
+//        }
+//
+//        @Override
+//        public void handleMessage(Message msg) {
+//            super.handleMessage(msg);
+//
+//            FactoryActivity factoryActivity = ref.get();
+//            if(factoryActivity != null) {
+//
+//            }
+//        }
+//
+//    }
 
     private void timer() {
         @SuppressLint("HandlerLeak") Handler handler = new Handler() {
@@ -70,9 +97,9 @@ public class FactoryActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (!getIntent().hasCategory(Intent.CATEGORY_HOME)) {
-            super.onBackPressed();
-        }
+//        if (!getIntent().hasCategory(Intent.CATEGORY_HOME)) {
+//            super.onBackPressed();
+//        }
     }
 
 

@@ -2,10 +2,10 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000"
-    android:id="@+id/main_view"
     tools:context=".MainActivity">
 
 
@@ -17,31 +17,31 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-<!--
-        <TextView
-            style="@style/TextViewSwitch"
-            android:text="PoE Off"
-            android:layout_marginTop="13dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="5dp"
-            android:textColor="@color/Graytext"/>
+        <!--
+                <TextView
+                    style="@style/TextViewSwitch"
+                    android:text="PoE Off"
+                    android:layout_marginTop="13dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="5dp"
+                    android:textColor="@color/Graytext"/>
 
-        <Switch
-            android:id="@+id/ethernet_switch"
-            style="@style/Switch"
-            android:layout_width="wrap_content"
-            android:layout_height="26dp"
-            android:layout_marginTop="10dp"
-            android:checked="false"
-            />
+                <Switch
+                    android:id="@+id/ethernet_switch"
+                    style="@style/Switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="26dp"
+                    android:layout_marginTop="10dp"
+                    android:checked="false"
+                    />
 
-        <TextView
-            style="@style/TextViewSwitch"
-            android:text="PoE On"
-            android:layout_marginTop="13dp"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
-            android:textColor="@color/Graytext"/> -->
+                <TextView
+                    style="@style/TextViewSwitch"
+                    android:text="PoE On"
+                    android:layout_marginTop="13dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:textColor="@color/Graytext"/> -->
         <!--<ImageView-->
         <!--android:id="@+id/eth_state"-->
         <!--android:layout_width="50dp"-->
@@ -79,22 +79,22 @@
 
         <Button
             android:id="@+id/main_network"
+            style="?android:buttonBarButtonStyle"
+
             android:layout_width="280dp"
             android:layout_height="190dp"
             android:layout_marginStart="15dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/selector_ip"
             android:gravity="start|bottom"
-            android:paddingBottom="15dp"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:ellipsize="marquee"
-            android:singleLine="true"
-            android:marqueeRepeatLimit="marquee_forever"
+            android:paddingBottom="15dp"
             android:shadowColor="#000000"
             android:shadowDx="3.0"
             android:shadowDy="3.0"
             android:shadowRadius="5.0"
+            android:singleLine="true"
             android:text="@string/network_camera"
             android:textAllCaps="false"
             android:textColor="@color/WhiteSmoke"
@@ -102,22 +102,23 @@
 
         <Button
             android:id="@+id/main_sdi"
+            style="?android:buttonBarButtonStyle"
+
             android:layout_width="225dp"
             android:layout_height="190dp"
             android:layout_marginStart="15dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/selector_sdi"
             android:gravity="start|bottom"
-            android:paddingBottom="15dp"
+            android:marqueeRepeatLimit="marquee_forever"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:ellipsize="marquee"
-            android:singleLine="true"
-            android:marqueeRepeatLimit="marquee_forever"
+            android:paddingBottom="15dp"
             android:shadowColor="#000000"
             android:shadowDx="3.0"
             android:shadowDy="3.0"
             android:shadowRadius="5.0"
+            android:singleLine="true"
             android:text="@string/sdi_camera"
             android:textAllCaps="false"
             android:textColor="@color/WhiteSmoke"
@@ -125,22 +126,23 @@
 
         <Button
             android:id="@+id/main_analog"
+            style="?android:buttonBarButtonStyle"
+
             android:layout_width="225dp"
             android:layout_height="190dp"
             android:layout_marginStart="15dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/selector_analog"
+            android:ellipsize="marquee"
             android:gravity="start|bottom"
-            android:paddingBottom="15dp"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:ellipsize="marquee"
-            android:singleLine="true"
-            android:marqueeRepeatLimit="marquee_forever"
+            android:paddingBottom="15dp"
             android:shadowColor="#000000"
             android:shadowDx="3.0"
             android:shadowDy="3.0"
             android:shadowRadius="5.0"
+            android:singleLine="true"
             android:text="@string/hd_analog_camera"
             android:textAllCaps="false"
             android:textColor="@color/WhiteSmoke"
@@ -150,22 +152,22 @@
             android:id="@+id/main_hdmi"
             android:layout_width="225dp"
             android:layout_height="190dp"
-            android:layout_marginBottom="15dp"
-            android:layout_marginEnd="40dp"
             android:layout_marginStart="15dp"
             android:layout_marginTop="10dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginBottom="15dp"
             android:background="@drawable/selector_hdmi"
+            android:ellipsize="marquee"
             android:gravity="start|bottom"
-            android:paddingBottom="15dp"
+            android:marqueeRepeatLimit="marquee_forever"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:ellipsize="marquee"
-            android:singleLine="true"
-            android:marqueeRepeatLimit="marquee_forever"
+            android:paddingBottom="15dp"
             android:shadowColor="#000000"
             android:shadowDx="3.0"
             android:shadowDy="3.0"
             android:shadowRadius="5.0"
+            android:singleLine="true"
             android:text="@string/hdmi"
             android:textAllCaps="false"
             android:textColor="@color/WhiteSmoke"
@@ -188,18 +190,18 @@
             android:layout_height="155dp"
             android:layout_marginStart="15dp"
             android:background="@drawable/selector_tdrc"
+            android:ellipsize="marquee"
             android:gravity="start|bottom"
-            android:paddingBottom="10dp"
+            android:marqueeRepeatLimit="marquee_forever"
             android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="10dp"
             android:shadowColor="#000000"
             android:shadowDx="3.0"
             android:shadowDy="3.0"
             android:shadowRadius="5.0"
-            android:text="@string/tdrc"
-            android:paddingEnd="20dp"
-            android:ellipsize="marquee"
             android:singleLine="true"
-            android:marqueeRepeatLimit="marquee_forever"
+            android:text="@string/tdrc"
             android:textAllCaps="false"
             android:textColor="@color/WhiteSmoke"
             android:textSize="16sp" />
@@ -211,18 +213,18 @@
             android:layout_height="155dp"
             android:layout_marginStart="15dp"
             android:background="@drawable/selector_tdru"
+            android:ellipsize="marquee"
             android:gravity="start|bottom"
-            android:paddingBottom="10dp"
+            android:marqueeRepeatLimit="marquee_forever"
             android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="10dp"
             android:shadowColor="#000000"
             android:shadowDx="3.0"
             android:shadowDy="3.0"
             android:shadowRadius="5.0"
-            android:text="@string/tdru"
-            android:paddingEnd="20dp"
-            android:ellipsize="marquee"
             android:singleLine="true"
-            android:marqueeRepeatLimit="marquee_forever"
+            android:text="@string/tdru"
             android:textAllCaps="false"
             android:textColor="@color/WhiteSmoke"
             android:textSize="16sp" />
@@ -233,17 +235,17 @@
             android:layout_height="155dp"
             android:layout_marginStart="15dp"
             android:background="@drawable/selector_optical"
+            android:ellipsize="marquee"
             android:gravity="start|bottom"
-            android:paddingBottom="10dp"
+            android:marqueeRepeatLimit="marquee_forever"
             android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="10dp"
             android:shadowColor="#000000"
             android:shadowDx="3.0"
             android:shadowDy="3.0"
             android:shadowRadius="5.0"
-            android:paddingEnd="20dp"
-            android:ellipsize="marquee"
             android:singleLine="true"
-            android:marqueeRepeatLimit="marquee_forever"
             android:text="@string/my_apps"
             android:textAllCaps="false"
             android:textColor="@color/WhiteSmoke"
@@ -255,17 +257,17 @@
             android:layout_height="155dp"
             android:layout_marginStart="15dp"
             android:background="@drawable/selector_packet"
+            android:ellipsize="marquee"
             android:gravity="start|bottom"
-            android:paddingBottom="10dp"
+            android:marqueeRepeatLimit="marquee_forever"
             android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="10dp"
             android:shadowColor="#000000"
             android:shadowDx="3.0"
             android:shadowDy="3.0"
             android:shadowRadius="5.0"
-            android:paddingEnd="20dp"
-            android:ellipsize="marquee"
             android:singleLine="true"
-            android:marqueeRepeatLimit="marquee_forever"
             android:text="@string/pakect"
             android:textAllCaps="false"
             android:textColor="@color/WhiteSmoke"
@@ -277,17 +279,17 @@
             android:layout_height="155dp"
             android:layout_marginStart="15dp"
             android:background="@drawable/selector_update"
+            android:ellipsize="marquee"
             android:gravity="start|bottom"
-            android:paddingBottom="10dp"
+            android:marqueeRepeatLimit="marquee_forever"
             android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="10dp"
             android:shadowColor="#000000"
             android:shadowDx="3.0"
             android:shadowDy="3.0"
             android:shadowRadius="5.0"
-            android:paddingEnd="20dp"
-            android:ellipsize="marquee"
             android:singleLine="true"
-            android:marqueeRepeatLimit="marquee_forever"
             android:text="@string/app_update"
             android:textAllCaps="false"
             android:textColor="@color/WhiteSmoke"
@@ -338,8 +340,6 @@
                 />
 
 
-
-
             <Button
                 android:id="@+id/sub_browser"
                 style="?android:buttonBarButtonStyle"
@@ -373,8 +373,7 @@
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_marginStart="30dp"
-                android:background="@drawable/selector_setting"
-                />
+                android:background="@drawable/selector_setting" />
 
 
         </LinearLayout>
@@ -395,13 +394,13 @@
             <TextView
                 android:layout_width="110dp"
                 android:layout_height="match_parent"
+                android:ellipsize="marquee"
                 android:gravity="center"
-                android:text="@string/gallery"
+                android:marqueeRepeatLimit="marquee_forever"
                 android:paddingStart="5dp"
                 android:paddingEnd="5dp"
                 android:singleLine="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
+                android:text="@string/gallery"
                 android:textColor="@color/WhiteSmoke"
                 android:textSize="15sp" />
 
@@ -409,77 +408,76 @@
                 android:layout_width="110dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="0dp"
+                android:ellipsize="marquee"
                 android:gravity="center"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:singleLine="true"
                 android:text="@string/file_manager"
                 android:textColor="@color/WhiteSmoke"
-                android:paddingStart="5dp"
-                android:paddingEnd="5dp"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
                 android:textSize="15sp" />
-
-
 
 
             <TextView
                 android:layout_width="110dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="0dp"
+                android:ellipsize="marquee"
                 android:gravity="center"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:singleLine="true"
                 android:text="@string/browser"
                 android:textColor="@color/WhiteSmoke"
-                android:paddingStart="5dp"
-                android:paddingEnd="5dp"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
                 android:textSize="15sp" />
 
             <TextView
                 android:layout_width="110dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="0dp"
+                android:ellipsize="marquee"
                 android:gravity="center"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:singleLine="true"
                 android:text="@string/ethernet_configuration"
                 android:textColor="@color/WhiteSmoke"
-                android:paddingStart="5dp"
-                android:paddingEnd="5dp"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
                 android:textSize="15sp" />
 
             <TextView
                 android:layout_width="110dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="0dp"
+                android:ellipsize="marquee"
                 android:gravity="center"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:singleLine="true"
                 android:text="@string/sd_card"
                 android:textColor="@color/WhiteSmoke"
-                android:paddingStart="5dp"
-                android:paddingEnd="5dp"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
                 android:textSize="15sp" />
 
             <TextView
                 android:layout_width="110dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="0dp"
+                android:ellipsize="marquee"
                 android:gravity="center"
-                android:text="@string/settings"
-                android:textColor="@color/WhiteSmoke"
+                android:marqueeRepeatLimit="marquee_forever"
                 android:paddingStart="5dp"
                 android:paddingEnd="5dp"
                 android:singleLine="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
+                android:text="@string/settings"
+                android:textColor="@color/WhiteSmoke"
                 android:textSize="15sp" />
 
 
         </LinearLayout>
+
         <TextView
             android:id="@+id/date_text"
             android:layout_width="wrap_content"
@@ -497,8 +495,8 @@
             android:id="@+id/time_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="40dp"
             android:layout_marginTop="40dp"
+            android:layout_marginEnd="40dp"
 
             android:fontFamily="sans-serif-thin"
             android:letterSpacing="0.05"
@@ -509,9 +507,6 @@
 
 
     </android.support.constraint.ConstraintLayout>
-
-
-
 
 
 </android.support.constraint.ConstraintLayout>

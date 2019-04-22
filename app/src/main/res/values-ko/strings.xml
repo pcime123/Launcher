@@ -86,7 +86,7 @@
     <string name="factory_apps_string3">플레이스토어를 이용하여 앱을 다운받아 사용할 수 있습니다.</string>
     <string name="factory_apps_string4">패킷 테스트</string>
     <string name="factory_apps_string5">패킷 데이터를 생성하여 송신 또는 수신이 가능합니다.</string>
-    <string name="factory_apps_string6">IP 주소와 포트를 설정해줘야 하며 네트워크가 성립되야 사용이 가능합니다.</string>
+    <string name="factory_apps_string6">IP 주소와 포트를 설정해줘야 하며 네트워크가 성립되어야 사용이 가능합니다.</string>
     <string name="factory_apps_string7">앱 업데이트</string>
     <string name="factory_apps_string8">제품에 설치되어 있는 앱을 업데이트 할 수 있습니다.</string>
     <string name="factory_apps_string9">Wi-Fi 또는 LAN 이 연결되었을 때 사용 가능합니다.</string>
@@ -104,5 +104,6 @@
     <string name="factory_popup">구매해주셔서 감사합니다.\n처음 구매자를 위한 기능 설명 가이드가 준비되어 있습니다.\n가이드를 보시겠습니까</string>
     <string name="dismiss">닫기</string>
     <string name="next">다음</string>
+    <string name="not_install">앱이 설치되어 있지 않습니다.</string>
 
 </resources>

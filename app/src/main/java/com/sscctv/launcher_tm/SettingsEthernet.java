@@ -56,6 +56,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -94,6 +95,7 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
     private InetAddress gatewayAddr;
     private Inet4Address inetAddr;
     private Inet4Address dnsAddr;
+    private InetAddress netAddr;
     private List<String> addList;
     private int prefixLength;
     private String netKey;
@@ -114,8 +116,8 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
     @BindView(R.id.btnAdd)
     Button addBtn;
 
-    @BindView(R.id.btn_help)
-    Button helpBtn;
+//    @BindView(R.id.btn_help)
+//    Button helpBtn;
 
     @BindView(R.id.edit)
     EditText editText;
@@ -165,6 +167,8 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings1);
         ButterKnife.bind(this);
+
+
 
         File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Ethernet/");
         if (!dir.exists()) {
@@ -320,6 +324,8 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
         protected void onPreExecute() {
 //            Log.d(TAG, "Start CheckTypesTask onPreExecute");
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setCancelable(false);
             progressDialog.setMessage(getResources().getString(R.string.please_wait));
             progressDialog.show();
 
@@ -374,6 +380,7 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
             } else if (ethMode.equals("DHCP")) {
 //                Log.d(TAG, "CheckTypesTask EthernetMode: DHCP");
                 dhcpMode.setChecked(true);
+                clearData();
                 value = true;
                 try {
                     dhcpcdDhcp();
@@ -391,7 +398,7 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
 
             if (ethMode.equals("STATIC")) {
 //                Log.d(TAG, "CheckTypesTask doInBackground: STATIC");
-                if(value) {
+                if (value) {
                     try {
                         netcfgEthUp();
                     } catch (IOException e) {
@@ -402,7 +409,7 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
                 }
             } else if (ethMode.equals("DHCP")) {
 //                Log.d(TAG, "CheckTypesTask doInBackground: DHCP");
-                if(value) {
+                if (value) {
                     try {
                         netcfgEthDown();
                         netcfgEthUp();
@@ -475,6 +482,8 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
         protected void onPreExecute() {
 //            Log.d(TAG, "Start setupNetwork onPreExecute");
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setCancelable(false);
             progressDialog.setMessage(getResources().getString(R.string.please_wait));
             progressDialog.show();
 
@@ -600,26 +609,26 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
         task.execute();
     }
 
-    @OnClick(R.id.btn_help)
-    void onClickHelp() {
-        AlertDialog.Builder builder;
-        AlertDialog alertDialog;
-        Context mContext = SettingsEthernet.this;
-
-        LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-        View layout = inflater.inflate(R.layout.custom_dialog, null);
-        builder = new AlertDialog.Builder(mContext);
-        builder.setView(layout);
-
-        builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        alertDialog = builder.create();
-        alertDialog.show();
-    }
+//    @OnClick(R.id.btn_help)
+//    void onClickHelp() {
+//        AlertDialog.Builder builder;
+//        AlertDialog alertDialog;
+//        Context mContext = SettingsEthernet.this;
+//
+//        LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+//        View layout = inflater.inflate(R.layout.custom_dialog, null);
+//        builder = new AlertDialog.Builder(mContext);
+//        builder.setView(layout);
+//
+//        builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                dialog.dismiss();
+//            }
+//        });
+//        alertDialog = builder.create();
+//        alertDialog.show();
+//    }
 
 
     private void killDhcp() {
@@ -681,6 +690,11 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
         Inet4Address gatewayAddr = getIPv4Address("192.168.1.1");
         Inet4Address dnsAddr = getIPv4Address("168.126.63.1");
 
+        try {
+            netcfgEthDown();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Class<?> clazz = null;
 
         try {
@@ -714,11 +728,16 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
         if (!dnsStr2.isEmpty()) {
             mStaticIpConfiguration.dnsServers.add(getIPv4Address(dnsStr2));
         }
-//        Log.d(TAG, "mStatic: " + mStaticIpConfiguration);
+        Log.d(TAG, "mStatic: " + mStaticIpConfiguration);
 
         mIpConfiguration = new IpConfiguration(IpConfiguration.IpAssignment.STATIC, IpConfiguration.ProxySettings.NONE, mStaticIpConfiguration, null);
         mEthernetManager.setConfiguration(mIpConfiguration);
 
+        try {
+            netcfgEthUp();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setStaticIP() {
@@ -759,7 +778,7 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
         if (!dnsStr2.isEmpty()) {
             mStaticIpConfiguration.dnsServers.add(getIPv4Address(dnsStr2));
         }
-        Log.d(TAG, "mStatic: " + mStaticIpConfiguration);
+//        Log.d(TAG, "mStatic: " + mStaticIpConfiguration);
 
         mIpConfiguration = new IpConfiguration(IpConfiguration.IpAssignment.STATIC, IpConfiguration.ProxySettings.NONE, mStaticIpConfiguration, null);
         mEthernetManager.setConfiguration(mIpConfiguration);
@@ -813,10 +832,9 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
             String mode;
 
             mode = getEthMode();
-
             switch (mode) {
                 case "DHCP":
-                    Log.d(TAG, "DHCP MODE");
+//                    Log.d(TAG, "DHCP MODE");
                     dhcpMode.setChecked(true);
 //                    addBtn.setEnabled(false);
 //
@@ -868,8 +886,9 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
 //                    Log.d(TAG, "IP Address: " + getEthernetIPAddress());
 //                    Log.d(TAG, "Mask Address: " + getEthernetMaskAddress());
 //                    Log.d(TAG, "GateWay: " + getGateWay());
-                    IpAddress.setText(getEthernetIPAddress());
-                    MaskAddress.setText(getEthernetMaskAddress());
+
+                    IpAddress.setText(getIpAddress());
+                    MaskAddress.setText(getNetMask());
                     GateWay.setText(getGateWay());
                     DNSAddress.setText(getDNSAddress());
                     break;
@@ -897,7 +916,7 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
         }
 
         bValue = sValue.contains("eth0");
-        Log.d(TAG, "getEnableIP bValue: " + bValue);
+//        Log.d(TAG, "getEnableIP bValue: " + bValue);
         return bValue;
     }
 
@@ -996,7 +1015,7 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
 
 
     public static boolean isIpAddress(String ipAddress) {
-        Log.d(TAG, "isIpAddress: " + ipAddress);
+//        Log.d(TAG, "isIpAddress: " + ipAddress);
         boolean returnValue = false;
 
         String regex = "^([0-9]{1,3}).([0-9]{1,3}).([0-9]{1,3}).([0-9]{1,3})$";
@@ -1034,6 +1053,7 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
 
     private String getEthMode() {
         String mode = mEthernetManager.getConfiguration().toString();
+//        Log.d(TAG, "getEthMode: " + mode);
         int iDHCP = mode.indexOf("DHCP");
 
         if (iDHCP == -1) {
@@ -1051,6 +1071,41 @@ public class SettingsEthernet extends Activity implements RadioGroup.OnCheckedCh
 //        Log.d(TAG, "value: " + value + " value2: " + value2);
         return str.substring(value, value2);
     }
+
+    private String getNetMask() {
+        String str = mEthernetManager.getConfiguration().getStaticIpConfiguration().toString();
+        int val = str.indexOf("address ") + 8;
+        int val1 = str.indexOf(" Gateway");
+        String str1 = str.substring(val, val1);
+        String[] parts = str1.split("/");
+        String ip = parts[0];
+
+        int prefix;
+        if (parts.length < 2) {
+            prefix = 0;
+        } else {
+            prefix = Integer.parseInt(parts[1]);
+        }
+
+        int mask = 0xffffffff << (32 - prefix);
+//        Log.d(TAG, "Prefix: " + prefix);
+//        Log.d(TAG, "IP: " + ip);
+
+        int value = mask;
+        byte[] bytes = new byte[]{
+                (byte) (value >>> 24), (byte) (value >> 16 & 0xff), (byte) (value >> 8 & 0xff), (byte) (value & 0xff)};
+
+        try {
+            netAddr = InetAddress.getByAddress(bytes);
+//            Log.d(TAG, "Mask: " + netAddr.getHostAddress());
+
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return netAddr.getHostAddress();
+
+    }
+
 
     private String getGateWay() {
         String str = mEthernetManager.getConfiguration().toString();

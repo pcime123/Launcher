@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -51,6 +53,17 @@ public class LanguageActivity extends Activity implements View.OnClickListener {
         btn_ge.setOnClickListener(this);
         btn_next.setOnClickListener(this);
 
+        btn_ko.setFocusableInTouchMode(true);
+        btn_ko.requestFocus();
+
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            runtime.exec("su -c ime enable com.standard.inputmethod.koreanime/.KoreanIME");
+            runtime.exec("su -c ime enable jp.co.omronsoft.openwnn/.OpenWnnJAJP");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
 //        decorView = getWindow().getDecorView();
 //        uiOption = getWindow().getDecorView().getSystemUiVisibility();
@@ -64,7 +77,7 @@ public class LanguageActivity extends Activity implements View.OnClickListener {
     }
 
     public void startActivity() {
-        Log.d(TAG, "startActivity");
+        //Log.d(TAG, "startActivity");
         startActivity(new Intent(LanguageActivity.this, MainActivity.class));
         finish();
     }
@@ -111,9 +124,9 @@ public class LanguageActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onBackPressed() {
-        if (!getIntent().hasCategory(Intent.CATEGORY_HOME)) {
-            super.onBackPressed();
-        }
+//        if (!getIntent().hasCategory(Intent.CATEGORY_HOME)) {
+//            super.onBackPressed();
+//        }
     }
 
     @Override
@@ -124,6 +137,13 @@ public class LanguageActivity extends Activity implements View.OnClickListener {
             case R.id.button_korean:
                 switchLanguage(this, new Locale("ko"));
 //                systemService.setTimeZone("Asia/Seoul");
+                Runtime runtime = Runtime.getRuntime();
+                try {
+                    runtime.exec("su -c ime set com.standard.inputmethod.koreanime/.KoreanIME");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
                 alarm.setTimeZone("GMT+9:00");
                 break;
             case R.id.button_english:
@@ -134,6 +154,12 @@ public class LanguageActivity extends Activity implements View.OnClickListener {
             case R.id.button_japanese:
                 switchLanguage(this, new Locale("ja"));
 //                systemService.setTimeZone("Asia/Seoul");
+                Runtime runtime1 = Runtime.getRuntime();
+                try {
+                    runtime1.exec("su -c ime set jp.co.omronsoft.openwnn/.OpenWnnJAJP");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 alarm.setTimeZone("GMT+9:00");
 
                 break;
@@ -149,6 +175,11 @@ public class LanguageActivity extends Activity implements View.OnClickListener {
                 break;
             case R.id.button_next:
                 startActivity();
+
+                SharedPreferences pref = getSharedPreferences("doFirst", MODE_PRIVATE);
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putBoolean("doFirst", false);
+                editor.apply();
                 break;
 
         }

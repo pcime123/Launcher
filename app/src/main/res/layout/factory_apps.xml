@@ -10,6 +10,7 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+
         android:padding="20dp">
 
         <TextView
@@ -19,6 +20,7 @@
             android:layout_marginTop="0dp"
             android:text="@string/factory_apps_string1"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             android:textColor="#E91E63"
             android:textSize="@dimen/factory_main" />
 
@@ -51,6 +53,7 @@
             android:layout_marginTop="5dp"
             android:text="@string/factory_apps_string4"
             app:layout_constraintTop_toBottomOf="@id/sub_2"
+            app:layout_constraintStart_toStartOf="parent"
             android:textColor="#E91E63"
             android:textSize="@dimen/factory_main" />
 
@@ -87,7 +90,8 @@
             android:text="@string/factory_apps_string7"
             android:textColor="#E91E63"
             android:textSize="@dimen/factory_main"
-            app:layout_constraintTop_toBottomOf="@id/tvSub1"/>
+            app:layout_constraintTop_toBottomOf="@id/tvSub1"
+            app:layout_constraintStart_toStartOf="parent"/>
 
 
         <TextView
@@ -118,16 +122,17 @@
             android:id="@+id/btn_dismiss"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:layout_marginBottom="2dp"
             android:layout_marginEnd="8dp"
             android:gravity="center"
             android:text="@string/dismiss"
-            android:textColor="#E91E63"
-            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_rounded_selector"
+            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -135,16 +140,17 @@
             android:id="@+id/btn_next"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:layout_marginBottom="2dp"
             android:layout_marginEnd="8dp"
             android:gravity="center"
             android:text="@string/next"
-            android:textColor="#E91E63"
-            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_rounded_selector"
+            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
     </android.support.constraint.ConstraintLayout>
